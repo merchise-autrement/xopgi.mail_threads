@@ -1,0 +1,4 @@
+global-exclude *.pyc
+global-exclude *.pyo
+
+recursive-include xopgi *.py *.xml *.csv *.css *.js *.po
