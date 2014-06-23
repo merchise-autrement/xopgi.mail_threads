@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------
-# xopgi.xopgi_account.__openerp__
+# xopgi.xopgi_mail_threads.__openerp__
 #----------------------------------------------------------------------
 # Copyright (c) 2013, 2014 Merchise Autrement
 # All rights reserved.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------
-# xopgi.addons.account._release
+# xopgi.xopgi_mail_threads._release
 #----------------------------------------------------------------------
 # Copyright (c) 2013, 2014 Merchise Autrement and Contributors
 # All rights reserved.
@@ -19,4 +19,4 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_imports)
 
 # TODO: Read from __openerp__.py
-VERSION = '1.5'
+VERSION = '1.0'
