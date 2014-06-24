@@ -42,11 +42,32 @@ from openerp.osv.orm import AbstractModel
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
 
+class _HybridDescriptor(object):
+    '''A simply hybrid attribute.
+
+    A hybrid behaves the same at the class and instance levels.
+
+    '''
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self.func.__get__(owner, owner.__class__)
+        else:
+            return self.func.__get__(instance, owner)
+
+
 class _MailRouterType(type):
     _base = None
 
     def __new__(cls, name, bases, attrs):
-        res = super(_MailRouterType, cls).__new__(cls, name, bases, attrs)
+        from types import FunctionType as function
+        newattrs = dict(attrs)
+        for name, value in attrs.items():
+            if isinstance(value, function):
+                newattrs[name] = _HybridDescriptor(value)
+        res = super(_MailRouterType, cls).__new__(cls, name, bases, newattrs)
         if not cls._base:
             cls._base = res
             res.registry = set()
@@ -86,8 +107,14 @@ class MailRouter(metaclass(_MailRouterType)):
     OpenERP and other routers.  They way mail routers are chained is
     undefined.  So, mail routers are encouraged to implement op-out features.
 
+    .. warning::
+
+       All methods defined in a mail router are automatically converted to
+       hybrid methods, this is, they are exposed as class methods as well as
+       instance methods.
+
     '''
-    @classmethod
+
     def is_applicable(cls, cr, uid, message):
         '''Return True if the router is applicable to the message.
 
@@ -107,7 +134,6 @@ class MailRouter(metaclass(_MailRouterType)):
         if cls is MailRouter:  # avoid failing when super()
             raise NotImplementedError()
 
-    @classmethod
     def apply(cls, cr, uid, routes, message):
         '''Transform if needed the `routes` according to the message.
 
@@ -119,7 +145,6 @@ class MailRouter(metaclass(_MailRouterType)):
         if cls is MailRouter:
             raise NotImplementedError()
 
-    @classmethod
     def find_route(cls, routes, pred=None):
         '''Yields pairs of `(position, route)` of routes that match the
         predicated `pred`.
