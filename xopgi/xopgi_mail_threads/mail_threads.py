@@ -119,6 +119,15 @@ class MailRouter(metaclass(_MailRouterType)):
         if cls is MailRouter:
             raise NotImplementedError()
 
+    @classmethod
+    def find_route(cls, routes, pred=None):
+        '''Yields pairs of `(position, route)` of routes that match the
+        predicated `pred`.
+
+        '''
+        return ((i, route) for i, route in enumerate(routes)
+                if not pred or pred(route))
+
 
 class mail_thread(AbstractModel):
     _name = get_modelname(_base_mail_thread)
