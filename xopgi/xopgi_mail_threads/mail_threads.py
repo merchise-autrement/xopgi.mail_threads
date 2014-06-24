@@ -46,12 +46,12 @@ class _MailRouterType(type):
     _base = None
 
     def __new__(cls, name, bases, attrs):
-        from xoutil.objects import setdefaultattr
         res = super(_MailRouterType, cls).__new__(cls, name, bases, attrs)
         if not cls._base:
             cls._base = res
+            res.registry = set()
         else:
-            registry = setdefaultattr(cls._base, 'registry', set())
+            registry = cls._base.registry
             registry.add(res)
         return res
 
