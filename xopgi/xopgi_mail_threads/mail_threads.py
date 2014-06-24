@@ -124,21 +124,9 @@ class mail_thread(AbstractModel):
     _name = get_modelname(_base_mail_thread)
     _inherit = _name
 
-    @staticmethod
-    def get_router_module(router):
-        from re import compile as re_compile
-        from xoutil.names import nameof
-        pattern = re_compile(r'^openerp\.addons\.(?P<module>[^\.]+)\.')
-        name = nameof(router, inner=True, full=True)
-        match = pattern.match(name)
-        if match:
-            module = match.group(1)
-            return module
-        else:
-            return None
-
     def is_router_installed(self, cr, uid, router):
-        module = self.get_router_module(router)
+        from xoeuf.modules import get_object_module
+        module = get_object_module(router)
         if module:
             mm = self.pool['ir.module.module']
             query = [('state', '=', 'installed'), ('name', '=', module)]
