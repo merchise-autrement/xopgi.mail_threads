@@ -42,16 +42,37 @@ from openerp.osv.orm import AbstractModel
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
 
+class _HybridDescriptor(object):
+    '''A simply hybrid attribute.
+
+    A hybrid behaves the same at the class and instance levels.
+
+    '''
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self.func.__get__(owner, owner.__class__)
+        else:
+            return self.func.__get__(instance, owner)
+
+
 class _MailRouterType(type):
     _base = None
 
     def __new__(cls, name, bases, attrs):
-        from xoutil.objects import setdefaultattr
-        res = super(_MailRouterType, cls).__new__(cls, name, bases, attrs)
+        from types import FunctionType as function
+        newattrs = dict(attrs)
+        for name, value in attrs.items():
+            if isinstance(value, function):
+                newattrs[name] = _HybridDescriptor(value)
+        res = super(_MailRouterType, cls).__new__(cls, name, bases, newattrs)
         if not cls._base:
             cls._base = res
+            res.registry = set()
         else:
-            registry = setdefaultattr(cls._base, 'registry', set())
+            registry = cls._base.registry
             registry.add(res)
         return res
 
@@ -86,8 +107,14 @@ class MailRouter(metaclass(_MailRouterType)):
     OpenERP and other routers.  They way mail routers are chained is
     undefined.  So, mail routers are encouraged to implement op-out features.
 
+    .. warning::
+
+       All methods defined in a mail router are automatically converted to
+       hybrid methods, this is, they are exposed as class methods as well as
+       instance methods.
+
     '''
-    @classmethod
+
     def is_applicable(cls, cr, uid, message):
         '''Return True if the router is applicable to the message.
 
@@ -107,7 +134,6 @@ class MailRouter(metaclass(_MailRouterType)):
         if cls is MailRouter:  # avoid failing when super()
             raise NotImplementedError()
 
-    @classmethod
     def apply(cls, cr, uid, routes, message):
         '''Transform if needed the `routes` according to the message.
 
@@ -119,10 +145,28 @@ class MailRouter(metaclass(_MailRouterType)):
         if cls is MailRouter:
             raise NotImplementedError()
 
+    def find_route(cls, routes, pred=None):
+        '''Yields pairs of `(position, route)` of routes that match the
+        predicated `pred`.
+
+        '''
+        return ((i, route) for i, route in enumerate(routes)
+                if not pred or pred(route))
+
 
 class mail_thread(AbstractModel):
     _name = get_modelname(_base_mail_thread)
     _inherit = _name
+
+    def is_router_installed(self, cr, uid, router):
+        from xoeuf.modules import get_object_module
+        module = get_object_module(router)
+        if module:
+            mm = self.pool['ir.module.module']
+            query = [('state', '=', 'installed'), ('name', '=', module)]
+            return bool(mm.search(cr, uid, query))
+        else:
+            return False
 
     def message_route(self, cr, uid, message, model=None, thread_id=None,
                       custom_values=None, context=None):
@@ -130,7 +174,8 @@ class mail_thread(AbstractModel):
         result = _super(cr, uid, message, model=model, thread_id=thread_id,
                         custom_values=custom_values, context=context)
         for router in MailRouter.registry:
-            if router.is_applicable(cr, uid, message):
+            if self.is_router_installed(cr, uid, router) and \
+               router.is_applicable(cr, uid, message):
                 router.apply(cr, uid, result, message)
         return result
 
