@@ -18,5 +18,13 @@ from __future__ import (division as _py3_division,
                         unicode_literals as _py3_unicode,
                         absolute_import as _py3_abs_imports)
 
-# TODO: Read from __openerp__.py
-VERSION = '1.0.1'
+
+def read_terpfile():
+    import os
+    from xoutil.fs.path import join
+    with open(join(os.path.dirname(__file__), '__openerp__.py'), 'rU') as fh:
+        content = fh.read()
+        return eval(content, {}, {})
+
+_TERP = read_terpfile()
+VERSION = _TERP['version']
