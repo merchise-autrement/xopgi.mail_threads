@@ -19,4 +19,4 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_imports)
 
 # TODO: Read from __openerp__.py
-VERSION = '1.0'
+VERSION = '1.0.1'
