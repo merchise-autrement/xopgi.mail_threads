@@ -13,8 +13,8 @@
 
 
 {
-    "name": "Mail Threads (extended - xopgi)",
-    "version": "1.0.1",
+    "name": "Mail Threads (xopgi)",
+    "version": "1.1",
     "author": "Merchise Autrement",
     "website": "http://xopgi.merchise.org/addons/xopgi_mail_threads",
     'category': 'Social Network',
