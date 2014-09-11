@@ -22,6 +22,7 @@
     "depends": ['mail'],
     "init_xml": [],
     "update_xml": [
+        "views/mail_message_view.xml",
     ],
     "demo_xml": [],
     "application": False,
