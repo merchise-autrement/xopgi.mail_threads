@@ -177,6 +177,18 @@ class mail_thread(AbstractModel):
             if self.is_router_installed(cr, uid, router) and \
                router.is_applicable(cr, uid, message):
                 router.apply(cr, uid, result, message)
+        if not result:
+            from xoutil.string import safe_encode
+            from xoutil import logger
+            import email
+            from email.message import Message
+            if not isinstance(message, Message):
+                message = email.message_from_string(safe_encode(message))
+            logger.warn(
+                "No routes found for message '%s' sent by '%s'",
+                message.get('Message-Id', 'No ID!'),
+                message.get('Sender', message.get('From', '<>'))
+            )
         return result
 
 

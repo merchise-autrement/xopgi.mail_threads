@@ -14,7 +14,7 @@
 
 {
     "name": "Mail Threads (xopgi)",
-    "version": "1.1",
+    "version": "1.2",
     "author": "Merchise Autrement",
     "website": "http://xopgi.merchise.org/addons/xopgi_mail_threads",
     'category': 'Social Network',
@@ -22,6 +22,7 @@
     "depends": ['mail'],
     "init_xml": [],
     "update_xml": [
+        "views/mail_message_view.xml",
     ],
     "demo_xml": [],
     "application": False,
