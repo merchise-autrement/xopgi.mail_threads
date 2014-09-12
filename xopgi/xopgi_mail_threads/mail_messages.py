@@ -35,6 +35,8 @@ from openerp.osv.orm import AbstractModel, Model, fields
 from openerp.addons.mail.mail_message import mail_message as _base
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
+from email.generator import Generator
+
 
 #: The name of the field to store the raw email.
 RAW_EMAIL_ATTR = 'raw_email'
@@ -58,8 +60,6 @@ class mail_message(Model):
 # Since the mailgate program actually call mail_thread's `message_process`,
 # that, in turn, call `message_parse` this is the place to make the raw_email
 # stuff happen, not the `mail_message` object.
-
-
 class mail_thread(AbstractModel):
     _name = get_modelname(_base_mail_thread)
     _inherit = _name
@@ -67,9 +67,60 @@ class mail_thread(AbstractModel):
     def message_parse(self, cr, uid, message, save_original=False,
                       context=None):
         from email.message import Message
+        assert isinstance(message, Message)
         result = super(mail_thread, self).message_parse(
             cr, uid, message, save_original=save_original, context=context)
-        if isinstance(message, Message):
-            message = message.as_string()
+        from io import BytesIO
+        buf = BytesIO()
+        # Re-encode to the connection encoding
+        gen = ReencodingGenerator(buf, mangle_from_=False,
+                                  target_charset=cr._cnx.encoding)
+        gen.flatten(message)
+        message = buf.getvalue()
         result[RAW_EMAIL_ATTR] = message
+        return result
+
+
+class ReencodingGenerator(Generator):
+    '''A generator that re-encodes text bodies to a given charset.
+
+    A message with 'text/...' Content-Type will be re-encoded (if needed) to
+    the target charset.
+
+    If the has a Content-Type-Encoding...
+
+    '''
+    def __init__(self, outfp, mangle_from_=True, maxheaderlen=78,
+                 target_charset='utf-8'):
+        self._target_charset = target_charset
+        Generator.__init__(
+            self,
+            outfp,
+            mangle_from_=mangle_from_,
+            maxheaderlen=maxheaderlen,
+        )
+
+    def clone(self, fp):
+        result = Generator.clone(self, fp)
+        result._target_charset = self._target_charset
+        return result
+
+    def _write(self, msg):
+        return Generator._write(self, self._reencode(msg))
+
+    def _reencode(self, msg):
+        if msg.get_content_maintype() != 'text':
+            return msg
+        from_charset = msg.get_content_charset()
+        target = self._target_charset
+        if not from_charset or from_charset == target:
+            result = msg
+        else:
+            from copy import deepcopy
+            result = deepcopy(msg)
+            payload = result.get_payload(decode=True)
+            newpayload = unicode(payload, from_charset)
+            result.set_payload(newpayload, target)
+            if 'MIME-Version' not in msg:
+                del result['MIME-Version']
         return result
