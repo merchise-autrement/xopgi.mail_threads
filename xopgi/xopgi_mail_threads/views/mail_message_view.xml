@@ -16,7 +16,9 @@
               <field name="body" />
             </page>
             <page string="Raw email">
-              <field name="raw_email" />
+              <pre>
+                <field name="raw_email" />
+              </pre>
             </page>
           </notebook>
         </xpath>
