@@ -73,17 +73,59 @@ class mail_thread(AbstractModel):
         from io import BytesIO
         buf = BytesIO()
         # Re-encode to the connection encoding
-        gen = HeadersGenerator(buf, mangle_from_=False,
-                               target_charset=cr._cnx.encoding)
+        gen = HeaderOnlyGenerator(buf, mangle_from_=False,
+                                  target_charset=cr._cnx.encoding)
         gen.flatten(message)
         message = buf.getvalue()
         result[RAW_EMAIL_ATTR] = message
         return result
 
 
-class HeadersGenerator(Generator):
-    '''A generator that only writes the headers.x
+class ReencodingGenerator(Generator):
+    '''A generator that re-encodes text bodies to a given charset.
 
+    A message with 'text/...' Content-Type will be re-encoded (if needed) to
+    the target charset.
+
+    '''
+    def __init__(self, outfp, mangle_from_=True, maxheaderlen=78,
+                 target_charset='utf-8'):
+        self._target_charset = target_charset
+        Generator.__init__(
+            self,
+            outfp,
+            mangle_from_=mangle_from_,
+            maxheaderlen=maxheaderlen,
+        )
+
+    def clone(self, fp):
+        result = Generator.clone(self, fp)
+        result._target_charset = self._target_charset
+        return result
+
+    def _write(self, msg):
+        return Generator._write(self, self._reencode(msg))
+
+    def _reencode(self, msg):
+        from xoutil.string import safe_decode
+        from copy import deepcopy
+        if msg.get_content_maintype() != 'text':
+            return msg
+        from_charset = msg.get_content_charset()
+        target = self._target_charset
+        result = deepcopy(msg)
+        payload = result.get_payload(decode=True)
+        newpayload = safe_decode(payload, encoding=from_charset)
+        result.set_payload(newpayload, target)
+        if 'MIME-Version' not in msg:
+            del result['MIME-Version']
+        return result
+
+
+class HeaderOnlyGenerator(Generator):
+    '''A generator that only prints the headers.
+
+    It makes sure the result is on a given charset.
 
     '''
     def __init__(self, outfp, mangle_from_=True, maxheaderlen=78,
