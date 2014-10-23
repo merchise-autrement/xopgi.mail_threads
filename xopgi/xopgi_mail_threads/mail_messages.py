@@ -73,7 +73,7 @@ class mail_thread(AbstractModel):
         from io import BytesIO
         buf = BytesIO()
         # Re-encode to the connection encoding
-        gen = ReencodingGenerator(buf, mangle_from_=False,
+        gen = HeaderOnlyGenerator(buf, mangle_from_=False,
                                   target_charset=cr._cnx.encoding)
         gen.flatten(message)
         message = buf.getvalue()
@@ -86,8 +86,6 @@ class ReencodingGenerator(Generator):
 
     A message with 'text/...' Content-Type will be re-encoded (if needed) to
     the target charset.
-
-    If the has a Content-Type-Encoding...
 
     '''
     def __init__(self, outfp, mangle_from_=True, maxheaderlen=78,
@@ -109,18 +107,43 @@ class ReencodingGenerator(Generator):
         return Generator._write(self, self._reencode(msg))
 
     def _reencode(self, msg):
+        from xoutil.string import safe_decode
+        from copy import deepcopy
         if msg.get_content_maintype() != 'text':
             return msg
         from_charset = msg.get_content_charset()
         target = self._target_charset
-        if not from_charset or from_charset == target:
-            result = msg
-        else:
-            from copy import deepcopy
-            result = deepcopy(msg)
-            payload = result.get_payload(decode=True)
-            newpayload = unicode(payload, from_charset)
-            result.set_payload(newpayload, target)
-            if 'MIME-Version' not in msg:
-                del result['MIME-Version']
+        result = deepcopy(msg)
+        payload = result.get_payload(decode=True)
+        newpayload = safe_decode(payload, encoding=from_charset)
+        result.set_payload(newpayload, target)
+        if 'MIME-Version' not in msg:
+            del result['MIME-Version']
         return result
+
+
+class HeaderOnlyGenerator(Generator):
+    '''A generator that only prints the headers.
+
+    It makes sure the result is on a given charset.
+
+    '''
+    def __init__(self, outfp, mangle_from_=True, maxheaderlen=78,
+                 target_charset='utf-8'):
+        self._target_charset = target_charset
+        Generator.__init__(
+            self,
+            outfp,
+            mangle_from_=mangle_from_,
+            maxheaderlen=maxheaderlen,
+        )
+
+    def clone(self, fp):
+        result = Generator.clone(self, fp)
+        result._target_charset = self._target_charset
+        return result
+
+    def _write(self, msg):
+        from xoutil.string import safe_encode
+        res = Generator._write_headers(self, msg)
+        return safe_encode(res, encoding=self._target_charset)
