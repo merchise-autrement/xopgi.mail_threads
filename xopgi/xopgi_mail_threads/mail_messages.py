@@ -144,6 +144,6 @@ class HeaderOnlyGenerator(Generator):
         return result
 
     def _write(self, msg):
-        from xoutil.string import safe_encode
+        from xoutil.string import safe_decode
         res = Generator._write_headers(self, msg)
-        return safe_encode(res, encoding=self._target_charset)
+        return safe_decode(res, encoding=self._target_charset)
