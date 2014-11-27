@@ -67,16 +67,17 @@ class mail_thread(AbstractModel):
     def message_parse(self, cr, uid, message, save_original=False,
                       context=None):
         from email.message import Message
+        from xoutil.string import safe_decode
         assert isinstance(message, Message)
         result = super(mail_thread, self).message_parse(
             cr, uid, message, save_original=save_original, context=context)
         from io import BytesIO
         buf = BytesIO()
         # Re-encode to the connection encoding
-        gen = HeaderOnlyGenerator(buf, mangle_from_=False,
+        gen = ReencodingGenerator(buf, mangle_from_=False,
                                   target_charset=cr._cnx.encoding)
         gen.flatten(message)
-        message = buf.getvalue()
+        message = safe_decode(buf.getvalue(), encoding=cr._cnx.encoding)
         result[RAW_EMAIL_ATTR] = message
         return result
 
@@ -107,15 +108,18 @@ class ReencodingGenerator(Generator):
         return Generator._write(self, self._reencode(msg))
 
     def _reencode(self, msg):
-        from xoutil.string import safe_decode
+        from xoutil.string import safe_decode, safe_encode
         from copy import deepcopy
         if msg.get_content_maintype() != 'text':
             return msg
-        from_charset = msg.get_content_charset()
+        from_charset = msg.get_content_charset() or 'ascii'
         target = self._target_charset
         result = deepcopy(msg)
         payload = result.get_payload(decode=True)
-        newpayload = safe_decode(payload, encoding=from_charset)
+        newpayload = safe_encode(
+            safe_decode(payload, encoding=from_charset),
+            encoding=target
+        )
         result.set_payload(newpayload, target)
         if 'MIME-Version' not in msg:
             del result['MIME-Version']
@@ -144,6 +148,11 @@ class HeaderOnlyGenerator(Generator):
         return result
 
     def _write(self, msg):
-        from xoutil.string import safe_encode
+        from xoutil.string import safe_decode, safe_encode
         res = Generator._write_headers(self, msg)
-        return safe_encode(res, encoding=self._target_charset)
+        # Headers are supposed to be always in US-ASCII, so let's decode from
+        # it and encode it to the target encoding.
+        return safe_encode(
+            safe_decode(res, encoding='ascii'),
+            encoding=self._target_charset
+        )
