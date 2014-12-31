@@ -52,7 +52,6 @@ setup(name=project_name,
       install_requires=[
           'xoeuf',
           'xoutil',
-          'openerp',
       ],
       entry_points="""
       [xoeuf.addons]
