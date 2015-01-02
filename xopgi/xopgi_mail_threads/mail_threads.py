@@ -2,7 +2,7 @@
 #----------------------------------------------------------------------
 # xopgi.xopgi_mail_threads.threads
 #----------------------------------------------------------------------
-# Copyright (c) 2014 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -38,6 +38,7 @@ from __future__ import (division as _py3_division,
 from xoutil.objects import metaclass
 from xoeuf.osv.orm import get_modelname
 
+from openerp.release import version_info as VERSION_INFO
 from openerp.osv.orm import AbstractModel
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
@@ -168,16 +169,12 @@ class mail_thread(AbstractModel):
         else:
             return False
 
-    def message_route(self, cr, uid, message, model=None, thread_id=None,
-                      custom_values=None, context=None):
-        _super = super(mail_thread, self).message_route
-        result = _super(cr, uid, message, model=model, thread_id=thread_id,
-                        custom_values=custom_values, context=context)
+    def _customize_routes(self, cr, uid, message, routes):
         for router in MailRouter.registry:
             if self.is_router_installed(cr, uid, router) and \
                router.is_applicable(cr, uid, message):
-                router.apply(cr, uid, result, message)
-        if not result:
+                router.apply(cr, uid, routes, message)
+        if not routes:
             from xoutil.string import safe_encode
             from xoutil import logger
             import email
@@ -189,7 +186,23 @@ class mail_thread(AbstractModel):
                 message.get('Message-Id', 'No ID!'),
                 message.get('Sender', message.get('From', '<>'))
             )
-        return result
+        return routes
+
+    if VERSION_INFO < (8, 0):
+        def message_route(self, cr, uid, message, model=None, thread_id=None,
+                          custom_values=None, context=None):
+            _super = super(mail_thread, self).message_route
+            result = _super(cr, uid, message, model=model, thread_id=thread_id,
+                            custom_values=custom_values, context=context)
+            return self._customize_routes(cr, uid, message, result)
+    else:
+        def message_route(self, cr, uid, rawmessage, message, model=None,
+                          thread_id=None, custom_values=None, context=None):
+            _super = super(mail_thread, self).message_route
+            result = _super(cr, uid, rawmessage, message, model=model,
+                            thread_id=thread_id,
+                            custom_values=custom_values, context=context)
+            return self._customize_routes(cr, uid, rawmessage, result)
 
 
 del metaclass, get_modelname, AbstractModel
