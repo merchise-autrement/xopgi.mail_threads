@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------
-# xopgi.xopgi_mail_threads.__openerp__
-#----------------------------------------------------------------------
-# Copyright (c) 2013, 2014 Merchise Autrement
+# ---------------------------------------------------------------------
+# xopgi.xopgi_mail_threads
+# ---------------------------------------------------------------------
+# Copyright (c) 2013-2015 Merchise Autrement
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -18,7 +18,7 @@
     "author": "Merchise Autrement",
     "website": "http://xopgi.merchise.org/addons/xopgi_mail_threads",
     'category': 'Social Network',
-    "description": "Improves OpenERP's basic threads detection.",
+    "description": "Improves OpenERP's basic mail management.",
     "depends": ['mail'],
     "init_xml": [],
     "update_xml": [
@@ -27,4 +27,5 @@
     "demo_xml": [],
     "application": False,
     "installable": True,
+    "auto_install": True,
 }
