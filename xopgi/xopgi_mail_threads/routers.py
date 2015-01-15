@@ -18,26 +18,7 @@ from __future__ import (division as _py3_division,
 
 from xoutil.objects import metaclass
 
-from .utils import _HybridDescriptor
-
-
-class _MailRouterType(type):
-    _base = None
-
-    def __new__(cls, name, bases, attrs):
-        from types import FunctionType as function
-        newattrs = dict(attrs)
-        for name, value in attrs.items():
-            if isinstance(value, function):
-                newattrs[name] = _HybridDescriptor(value)
-        res = super(_MailRouterType, cls).__new__(cls, name, bases, newattrs)
-        if not cls._base:
-            cls._base = res
-            res.registry = set()
-        else:
-            registry = cls._base.registry
-            registry.add(res)
-        return res
+from .utils import RegisteredType
 
 
 # TODO: Check the metaclass reliability.
@@ -46,8 +27,7 @@ class _MailRouterType(type):
 # Since the metaclass will register all classes derived from MailRouter, and
 # those classes may actually be non-suitable to all databases, the cr and uid
 # arguments were introduced for that reason.
-
-class MailRouter(metaclass(_MailRouterType)):
+class MailRouter(metaclass(RegisteredType)):
     '''A router for mail to objects inside OpenERP.
 
     A router is an "after the fact" mechanism for the routing mechanism
@@ -78,6 +58,7 @@ class MailRouter(metaclass(_MailRouterType)):
 
     '''
 
+    @classmethod
     def is_applicable(cls, cr, uid, message):
         '''Return True if the router is applicable to the message.
 
@@ -97,6 +78,7 @@ class MailRouter(metaclass(_MailRouterType)):
         if cls is MailRouter:  # avoid failing when super()
             raise NotImplementedError()
 
+    @classmethod
     def apply(cls, cr, uid, routes, message):
         '''Transform if needed the `routes` according to the message.
 
@@ -108,6 +90,7 @@ class MailRouter(metaclass(_MailRouterType)):
         if cls is MailRouter:
             raise NotImplementedError()
 
+    @classmethod
     def find_route(cls, routes, pred=None):
         '''Yields pairs of `(position, route)` of routes that match the
         predicated `pred`.

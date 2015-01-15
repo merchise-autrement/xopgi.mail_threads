@@ -17,17 +17,15 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 
-class _HybridDescriptor(object):
-    '''A simply hybrid attribute.
+class RegisteredType(type):
+    '''A metaclass that registers all its instances.'''
 
-    A hybrid behaves the same at the class and instance levels.
-
-    '''
-    def __init__(self, func):
-        self.func = func
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self.func.__get__(owner, owner.__class__)
+    def __new__(cls, name, bases, attrs):
+        res = super(RegisteredType, cls).__new__(cls, name, bases, attrs)
+        root = res.mro()[-2]
+        registry = getattr(root, 'registry', None)
+        if registry is not None:
+            registry.add(res)
         else:
-            return self.func.__get__(instance, owner)
+            root.registry = set()
+        return res
