@@ -26,6 +26,30 @@ directory.
 This addons does not use features not in the core OpenERP_.
 
 
+Usage
+=====
+
+Mail routers are Python new-style classes that inherit from ``MailRouter``.
+They must implement the ``is_applicable()`` to test whether a message should
+be routed using this router, and the method ``apply()`` to actually do the
+routing.
+
+::
+
+   from openerp.addons.xopgi_mail_threads import MailRouter
+
+
+   class MyRouter(MailRouter):
+       @classmethod
+       def is_applicable(cls, cr, uid, message):
+          return False
+
+       @classmethod
+       def apply(cls, cr, uid, routes, message):
+           return routes
+
+
+
 .. _buildout: http://buildout.org/
 .. _OpenERP/Odoo: Odoo_
 .. _OpenERP: Odoo_
