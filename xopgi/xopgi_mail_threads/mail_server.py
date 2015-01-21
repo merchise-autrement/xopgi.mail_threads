@@ -87,7 +87,6 @@ class MailServer(Model):
                     kw.update((key, val) for key, val in data.items()
                               if key in valid)
                     kw['context'] = context
-        import ipdb; ipdb.set_trace()
         return _super(cr, uid, message, **kw)
 
 
