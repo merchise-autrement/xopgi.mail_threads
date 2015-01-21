@@ -25,7 +25,7 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoutil.objects import metaclass, classproperty
+from xoutil.objects import metaclass
 
 from .utils import RegisteredType
 
@@ -56,9 +56,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
     def query(self, cr, uid, message, context=None):
         '''Respond if the transport router can or must deliver the provided
         message.'''
-        if self is MailTransportRouter:
-            raise NotImplemented()
-
+        raise NotImplemented()
 
     @classmethod
     def deliver(self, cr, uid, message, context=None):
