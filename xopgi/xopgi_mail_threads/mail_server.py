@@ -47,8 +47,8 @@ class MailServer(Model):
         '''Sends an email.
 
         Overrides the basic OpenERP's sending to allow transports to kick in.
-        Basically it takes the best transport and delivers the email with it
-        if possible.
+        Basically it selects a transport and delivers the email with it if
+        possible.
 
         The transport may choose to deliver the email by itself.  In this case
         the basic OpenERP is not used (unless the transport uses the provided
@@ -63,25 +63,27 @@ class MailServer(Model):
         '''
         _super = super(MailServer, self).send_email
         if DIRECT_SEND_CONTEXT not in execution_context:
+            from .transports import MailTransportRouter as transports
             mail_server_id = kw.get('mail_server_id', None)
             smtp_server = kw.get('smtp_server', None)
             context = kw.pop('context', {})
             if neither(mail_server_id, smtp_server):
-                from .transports import proper_transport
-                transport = proper_transport(
-                    self, cr, uid, message, context=context
+                transport = transports.select(
+                    cr, uid, message, context=context
                 )
                 delivered, data = False, {}
                 if transport:
-                    direct, message, data = transport.prepare_message(
-                        cr, uid, message, context=context
-                    )
-                    if direct:
+                    with transport:
+                        message, data = transport.prepare_message(
+                            cr, uid, message, context=context
+                        )
                         delivered = transport.deliver(
-                            cr, uid, message,
+                            cr, uid, message, data,
                             context=context
                         )
-                if not delivered and data:
+                if delivered:
+                    return delivered
+                elif data:
                     context.update(data.pop('context', {}))
                     valid = get_kwargs(_super)
                     kw.update((key, val) for key, val in data.items()
@@ -89,13 +91,10 @@ class MailServer(Model):
                     kw['context'] = context
         return _super(cr, uid, message, **kw)
 
+    def send_without_transports(self, cr, uid, message, **kw):
+        '''Send a message without using third-party transports.'''
+        with execution_context(DIRECT_SEND_CONTEXT):
+            self.send_email(cr, uid, message, **kw)
+
 
 DIRECT_SEND_CONTEXT = object()
-
-
-# NOTICE: Not in the ir.mail_server.
-def direct_send(self, cr, uid, message, **kw):
-    '''Send a message without using third-party transports.'''
-    server = self.pool['ir.mail_server']
-    with execution_context(DIRECT_SEND_CONTEXT):
-        server.send_email(cr, uid, message, **kw)
