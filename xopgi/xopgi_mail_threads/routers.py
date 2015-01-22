@@ -31,7 +31,7 @@ class MailRouter(metaclass(RegisteredType)):
     '''A router for mail to objects inside OpenERP.
 
     A router is an "after the fact" mechanism for the routing mechanism
-    implemented by the `mail` module of OpenERP.  This module apply only three
+    implemented by the `mail` module of OpenERP.  OpenERP apply only three
     rules:
 
     a) Based on the "References" and "In-Reply-To" if and only if they match
