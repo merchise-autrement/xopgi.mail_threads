@@ -44,11 +44,10 @@ from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
 # Backwards-compatible fix.
 from xoutil.deprecation import deprecated
-from .routers import MailRouter  # noqa
+from .routers import MailRouter
+MailRouter = deprecated(MailRouter)(MailRouter)
 
-MailRouter = deprecated(MailRouter)
-
-del deprecated
+del deprecated, MailRouter
 
 
 class mail_thread(AbstractModel):
@@ -57,6 +56,8 @@ class mail_thread(AbstractModel):
 
     def _customize_routes(self, cr, uid, message, routes):
         from .utils import is_router_installed
+        from .routers import MailRouter
+
         for router in MailRouter.registry:
             if is_router_installed(cr, uid, router) and \
                router.is_applicable(cr, uid, message):
