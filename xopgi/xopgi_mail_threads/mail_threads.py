@@ -55,19 +55,10 @@ class mail_thread(AbstractModel):
     _name = get_modelname(_base_mail_thread)
     _inherit = _name
 
-    def is_router_installed(self, cr, uid, router):
-        from xoeuf.modules import get_object_module
-        module = get_object_module(router)
-        if module:
-            mm = self.pool['ir.module.module']
-            query = [('state', '=', 'installed'), ('name', '=', module)]
-            return bool(mm.search(cr, uid, query))
-        else:
-            return False
-
     def _customize_routes(self, cr, uid, message, routes):
+        from .utils import is_router_installed
         for router in MailRouter.registry:
-            if self.is_router_installed(cr, uid, router) and \
+            if is_router_installed(cr, uid, router) and \
                router.is_applicable(cr, uid, message):
                 router.apply(cr, uid, routes, message)
         if not routes:

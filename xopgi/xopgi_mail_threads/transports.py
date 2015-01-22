@@ -55,6 +55,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         deliver a message.
 
         '''
+        from .utils import is_router_installed
         from xoutil.context import context
         candidates = (router for router in MailTransportRouter.registry
                       if is_router_installed(cr, uid, router)
@@ -67,7 +68,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
                 transport = candidate
             else:
                 candidate = next(candidates, None)
-        return transport()
+        return transport() if transport else None
 
     @classproperty
     def context_name(cls):
@@ -134,20 +135,6 @@ class MailTransportRouter(metaclass(RegisteredType)):
 
         '''
         return TransportRouteData(message, {})
-
-
-def is_router_installed(cr, uid, router):
-    from xoeuf.osv.registry import Registry
-    from xoeuf.modules import get_object_module
-    module = get_object_module(router)
-    if module:
-        db = Registry(cr.dbname)
-        with db() as cr:
-            mm = db.models['ir.module.module']
-            query = [('state', '=', 'installed'), ('name', '=', module)]
-            return bool(mm.search(cr, uid, query))
-    else:
-        return False
 
 
 del metaclass, classproperty, RegisteredType, namedtuple

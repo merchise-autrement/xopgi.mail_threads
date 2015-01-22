@@ -29,3 +29,17 @@ class RegisteredType(type):
         else:
             root.registry = set()
         return res
+
+
+def is_router_installed(cr, uid, router):
+    from xoeuf.osv.registry import Registry
+    from xoeuf.modules import get_object_module
+    module = get_object_module(router)
+    if module:
+        db = Registry(cr.dbname)
+        with db() as cr:
+            mm = db.models['ir.module.module']
+            query = [('state', '=', 'installed'), ('name', '=', module)]
+            return bool(mm.search(cr, uid, query))
+    else:
+        return False
