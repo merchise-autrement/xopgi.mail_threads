@@ -137,19 +137,25 @@ class MailTransportRouter(metaclass(RegisteredType)):
         '''
         return TransportRouteData(message, {})
 
-    def get_message_object(self, obj, cr, uid, message, context=None):
-        '''Get the mail.message browse record for the `message`.
+    def get_message_objects(self, obj, cr, uid, message, context=None):
+        '''Get the mail.message browse records for the `message` .
 
         '''
         from xoeuf.osv.model_extensions import search_browse
         message_id = message['Message-Id']
-        messages = obj.pool['mail.message']
+        references = tuple(
+            ref.strip()
+            for ref in message.get('References', '').split(',')
+        )
+        mail_messages = obj.pool['mail.message']
         query = [('message_id', '=', message_id)]
-        message = search_browse(messages, cr, uid, query, context=context)
-        if message:
-            return message
-        else:
-            return None
-
+        msg = search_browse(mail_messages, cr, uid, query, context=context)
+        if not msg:
+            msg = None  # convert the null-record to None
+        if references:
+            query = [('message_id', 'in', references)]
+            refs = search_browse(mail_messages, cr, uid, query,
+                                 context=context, ensure_list=True)
+        return msg, refs
 
 del metaclass, classproperty, RegisteredType, namedtuple
