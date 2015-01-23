@@ -37,7 +37,13 @@ neither = lambda *args: all(not a for a in args)
 def get_kwargs(func):
     from xoutil.inspect import getfullargspec
     spec = getfullargspec(func)
-    return (spec.varkw or []).extend(spec.kwonlyargs or [])
+    argsspec = spec.args
+    if argsspec and spec.defaults:
+        argsspec = argsspec[-len(spec.defaults):]
+    else:
+        argsspec = []
+    argsspec.extend(spec.kwonlyargs or [])
+    return argsspec
 
 
 class MailServer(Model):
@@ -87,7 +93,7 @@ class MailServer(Model):
                     context.update(data.pop('context', {}))
                     valid = get_kwargs(_super)
                     kw.update((key, val) for key, val in data.items()
-                              if key in valid)
+                              if valid and key in valid)
                     kw['context'] = context
         return _super(cr, uid, message, **kw)
 
