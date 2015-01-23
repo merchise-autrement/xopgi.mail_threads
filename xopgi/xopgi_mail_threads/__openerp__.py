@@ -20,8 +20,7 @@
     'category': 'Social Network',
     "description": "Improves OpenERP's basic mail management.",
     "depends": ['mail'],
-    "init_xml": [],
-    "update_xml": [
+    "data": [
         "views/mail_message_view.xml",
     ],
     "demo_xml": [],
