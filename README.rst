@@ -63,12 +63,18 @@ Mail transports
 Mail transports are Python new-style classes that inherit from
 ``MailTransportRouter``.  Transports must implement the following methods:
 
-``query(cr, uid, message, context=None)``
+``query(obj, cr, uid, message, context=None)``
+
+   This is a classmethod.
 
    Called to know whether this transport can deliver a `message`.  It return
    value indicates whether the transport can or cannot deliver the message.
 
-``prepare_message(cr, uid, message, context=None)``
+   The `obj` is the `ir.mail_server` object.  Useful to access the `pool` so
+   that consulting the DB can be done in the same cursor.
+
+
+``prepare_message(obj, cr, uid, message, context=None)``
 
    This is called for the *selected* transport that will deliver the message.
 
@@ -79,7 +85,7 @@ Mail transports are Python new-style classes that inherit from
    arguments for the ``send_email`` method of ``ir.mail_server``.
 
 
-``deliver(cr, uid, message, data, context=None)``
+``deliver(obj, cr, uid, message, data, context=None)``
 
    Deliver the message if possible.
 

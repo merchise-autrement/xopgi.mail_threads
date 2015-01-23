@@ -69,16 +69,16 @@ class MailServer(Model):
             context = kw.pop('context', {})
             if neither(mail_server_id, smtp_server):
                 transport = transports.select(
-                    cr, uid, message, context=context
+                    self, cr, uid, message, context=context
                 )
                 delivered, data = False, {}
                 if transport:
                     with transport:
                         message, data = transport.prepare_message(
-                            cr, uid, message, context=context
+                            self, cr, uid, message, context=context
                         )
                         delivered = transport.deliver(
-                            cr, uid, message, data,
+                            self, cr, uid, message, data,
                             context=context
                         )
                 if delivered:

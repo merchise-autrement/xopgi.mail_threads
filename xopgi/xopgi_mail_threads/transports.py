@@ -48,7 +48,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
     '''
 
     @classmethod
-    def select(cls, cr, uid, message, context=None):
+    def select(cls, obj, cr, uid, message, context=None):
         '''Select a registered transport that can deliver the message.
 
         No order is warranted about how to select any transport that can
@@ -63,7 +63,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         found, transport = False, None
         candidate = next(candidates, None)
         while not found and candidate:
-            found = candidate.query(cr, uid, message, context=context)
+            found = candidate.query(obj, cr, uid, message, context=context)
             if found:
                 transport = candidate
             else:
@@ -88,7 +88,8 @@ class MailTransportRouter(metaclass(RegisteredType)):
         _logger.debug("Exiting context for %s", self.context_name)
         return self.context.__exit__(*args)
 
-    def query(self, cr, uid, message, context=None):
+    @classmethod
+    def query(cls, obj, cr, uid, message, context=None):
         '''Respond if the transport router can deliver the message.
 
         Returns True if the transport can deliver the message and False,
@@ -97,7 +98,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         '''
         raise NotImplemented()
 
-    def deliver(self, cr, uid, message, data, context=None):
+    def deliver(self, obj, cr, uid, message, data, context=None):
         '''Deliver if possible the message.
 
         Return False if the transport won't do the delivery directly.  This
@@ -123,10 +124,10 @@ class MailTransportRouter(metaclass(RegisteredType)):
         '''
         return False
 
-    def prepare_message(self, cr, uid, message, context=None):
+    def prepare_message(self, obj, cr, uid, message, context=None):
         '''Prepares the message to be delivered.
 
-        Returns a named tuple with ``(message, connection_data)``.
+        Returns a tuple with ``(message, connection_data)``.
 
         The ``message`` attribute is the message that OpenERP will actually
         send, while ``connection_data`` will be used to instruct the
@@ -135,6 +136,20 @@ class MailTransportRouter(metaclass(RegisteredType)):
 
         '''
         return TransportRouteData(message, {})
+
+    def get_message_object(self, obj, cr, uid, message, context=None):
+        '''Get the mail.message browse record for the `message`.
+
+        '''
+        from xoeuf.osv.model_extensions import search_browse
+        message_id = message['Message-Id']
+        messages = obj.pool['mail.message']
+        query = [('message_id', '=', message_id)]
+        message = search_browse(messages, cr, uid, query, context=context)
+        if message:
+            return message
+        else:
+            return None
 
 
 del metaclass, classproperty, RegisteredType, namedtuple
