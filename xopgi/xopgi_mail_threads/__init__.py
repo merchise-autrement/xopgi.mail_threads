@@ -22,3 +22,4 @@ from . import mail_threads  # noqa
 from . import mail_server  # noqa
 
 from .routers import MailRouter  # noqa
+from .transports import TransportRouteData, MailTransportRouter  # noqa
