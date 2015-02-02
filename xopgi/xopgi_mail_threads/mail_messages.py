@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
-#----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # mail_messages
-#----------------------------------------------------------------------
-# Copyright (c) 2014 Merchise Autrement and Contributors
+# ---------------------------------------------------------------------
+# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -31,7 +31,8 @@ from __future__ import (division as _py3_division,
 
 from xoeuf.osv.orm import get_modelname
 
-from openerp.osv.orm import AbstractModel, Model, fields
+from openerp.osv import fields
+from openerp.osv.orm import AbstractModel, Model
 from openerp.addons.mail.mail_message import mail_message as _base
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 

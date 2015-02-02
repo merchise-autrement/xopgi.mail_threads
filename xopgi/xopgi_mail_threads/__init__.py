@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads
-#----------------------------------------------------------------------
-# Copyright (c) 2014 Merchise Autrement
+# ---------------------------------------------------------------------
+# Copyright (c) 2014, 2015 Merchise Autrement
 # All rights reserved.
 #
 #
@@ -17,5 +17,9 @@ from __future__ import (division as _py3_division,
                         unicode_literals as _py3_unicode,
                         absolute_import as _py3_abs_import)
 
-from . import mail_messages
-from . import mail_threads
+from . import mail_messages  # noqa
+from . import mail_threads  # noqa
+from . import mail_server  # noqa
+
+from .routers import MailRouter  # noqa
+from .transports import TransportRouteData, MailTransportRouter  # noqa
