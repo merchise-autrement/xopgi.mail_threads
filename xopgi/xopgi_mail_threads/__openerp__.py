@@ -14,7 +14,7 @@
 
 {
     "name": "Mail Threads (xopgi)",
-    "version": "2.0",
+    "version": "2.1",
     "author": "Merchise Autrement",
     "website": "http://xopgi.merchise.org/addons/xopgi_mail_threads",
     'category': 'Social Network',
