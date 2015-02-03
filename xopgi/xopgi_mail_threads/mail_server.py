@@ -27,6 +27,7 @@ from __future__ import (division as _py3_division,
 
 # TODO: Review with gevent-based model.
 from xoutil.context import context as execution_context
+from xoutil import logger as _logger
 
 from openerp.osv.orm import Model
 
@@ -69,32 +70,39 @@ class MailServer(Model):
         '''
         _super = super(MailServer, self).send_email
         if DIRECT_SEND_CONTEXT not in execution_context:
-            from .transports import MailTransportRouter as transports
-            mail_server_id = kw.get('mail_server_id', None)
-            smtp_server = kw.get('smtp_server', None)
-            context = kw.pop('context', {})
-            if neither(mail_server_id, smtp_server):
-                transport = transports.select(
-                    self, cr, uid, message, context=context
+            transport = None
+            try:
+                from .transports import MailTransportRouter as transports
+                mail_server_id = kw.get('mail_server_id', None)
+                smtp_server = kw.get('smtp_server', None)
+                context = kw.pop('context', {})
+                if neither(mail_server_id, smtp_server):
+                    transport = transports.select(
+                        self, cr, uid, message, context=context
+                    )
+                    delivered, data = False, {}
+                    if transport:
+                        with transport:
+                            message, data = transport.prepare_message(
+                                self, cr, uid, message, context=context
+                            )
+                            delivered = transport.deliver(
+                                self, cr, uid, message, data,
+                                context=context
+                            )
+                    if delivered:
+                        return delivered
+                    elif data:
+                        context.update(data.pop('context', {}))
+                        valid = get_kwargs(_super)
+                        kw.update((key, val) for key, val in data.items()
+                                  if valid and key in valid)
+                        kw['context'] = context
+            except:
+                _logger.exception(
+                    'Transport %s failed. Falling back',
+                    transport
                 )
-                delivered, data = False, {}
-                if transport:
-                    with transport:
-                        message, data = transport.prepare_message(
-                            self, cr, uid, message, context=context
-                        )
-                        delivered = transport.deliver(
-                            self, cr, uid, message, data,
-                            context=context
-                        )
-                if delivered:
-                    return delivered
-                elif data:
-                    context.update(data.pop('context', {}))
-                    valid = get_kwargs(_super)
-                    kw.update((key, val) for key, val in data.items()
-                              if valid and key in valid)
-                    kw['context'] = context
         return _super(cr, uid, message, **kw)
 
     def send_without_transports(self, cr, uid, message, **kw):
