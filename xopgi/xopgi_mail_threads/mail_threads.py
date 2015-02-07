@@ -60,12 +60,15 @@ class mail_thread(AbstractModel):
         from .utils import is_router_installed
         from .routers import MailRouter
         for router in MailRouter.registry:
+            # Since a router may fail after modifying `routes` somehow, let's
+            # keep it safe here to restore if needed.
+            routes_copy = routes[:]
             try:
-                if is_router_installed(cr, uid, router) and \
-                   router.is_applicable(cr, uid, message):
+                if is_router_installed(cr, uid, router) and router.is_applicable(cr, uid, message):
                     router.apply(cr, uid, routes, message)
             except:
-                _logger.exception('Router %s failed.', router)
+                _logger.exception('Router %s failed.  Ignoring it.', router)
+                routes = routes_copy
         if not routes:
             from xoutil.string import safe_encode
             from xoutil import logger
