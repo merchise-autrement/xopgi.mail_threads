@@ -38,7 +38,7 @@ from __future__ import (division as _py3_division,
 from xoutil.objects import metaclass
 from xoeuf.osv.orm import get_modelname
 
-from openerp.release import version_info as VERSION_INFO
+from openerp.release import version_info as ODOO_VERSION_INFO
 from openerp.osv.orm import AbstractModel
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
@@ -83,7 +83,7 @@ class mail_thread(AbstractModel):
             )
         return routes
 
-    if VERSION_INFO < (8, 0):
+    if ODOO_VERSION_INFO < (8, 0):
         def message_route(self, cr, uid, message, model=None, thread_id=None,
                           custom_values=None, context=None):
             _super = super(mail_thread, self).message_route
