@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
-#----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads.threads
-#----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
 #
@@ -38,7 +38,7 @@ from __future__ import (division as _py3_division,
 from xoutil.objects import metaclass
 from xoeuf.osv.orm import get_modelname
 
-from openerp.release import version_info as VERSION_INFO
+from openerp.release import version_info as ODOO_VERSION_INFO
 from openerp.osv.orm import AbstractModel
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
@@ -60,12 +60,15 @@ class mail_thread(AbstractModel):
         from .utils import is_router_installed
         from .routers import MailRouter
         for router in MailRouter.registry:
+            # Since a router may fail after modifying `routes` somehow, let's
+            # keep it safe here to restore if needed.
+            routes_copy = routes[:]
             try:
-                if is_router_installed(cr, uid, router) and \
-                   router.is_applicable(cr, uid, message):
+                if is_router_installed(cr, uid, router) and router.is_applicable(cr, uid, message):
                     router.apply(cr, uid, routes, message)
             except:
-                _logger.exception('Router %s failed.', router)
+                _logger.exception('Router %s failed.  Ignoring it.', router)
+                routes = routes_copy
         if not routes:
             from xoutil.string import safe_encode
             from xoutil import logger
@@ -80,7 +83,7 @@ class mail_thread(AbstractModel):
             )
         return routes
 
-    if VERSION_INFO < (8, 0):
+    if ODOO_VERSION_INFO < (8, 0):
         def message_route(self, cr, uid, message, model=None, thread_id=None,
                           custom_values=None, context=None):
             _super = super(mail_thread, self).message_route
