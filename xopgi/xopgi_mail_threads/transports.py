@@ -127,7 +127,8 @@ class MailTransportRouter(metaclass(RegisteredType)):
     def prepare_message(self, obj, cr, uid, message, context=None):
         '''Prepares the message to be delivered.
 
-        Returns a tuple with ``(message, connection_data)``.
+        Returns a named tuple TransportRouteData with ``(message,
+        connection_data)``.
 
         The ``message`` attribute is the message that OpenERP will actually
         send, while ``connection_data`` will be used to instruct the
