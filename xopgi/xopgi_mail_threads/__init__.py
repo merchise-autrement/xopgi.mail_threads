@@ -16,10 +16,11 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         unicode_literals as _py3_unicode,
                         absolute_import as _py3_abs_import)
-
+from . import ir_model_access
 from . import mail_messages  # noqa
 from . import mail_threads  # noqa
 from . import mail_server  # noqa
 
 from .routers import MailRouter  # noqa
 from .transports import TransportRouteData, MailTransportRouter  # noqa
+
