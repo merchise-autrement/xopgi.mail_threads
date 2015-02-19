@@ -57,9 +57,9 @@ class MailTransportRouter(metaclass(RegisteredType)):
         '''
         from .utils import is_router_installed
         from xoutil.context import context
-        candidates = (router for router in MailTransportRouter.registry
-                      if is_router_installed(cr, uid, router)
-                      if router.context_name not in context)
+        candidates = (transport for transport in MailTransportRouter.registry
+                      if is_router_installed(cr, uid, transport)
+                      if transport.context_name not in context)
         found, transport = False, None
         candidate = next(candidates, None)
         while not found and candidate:
