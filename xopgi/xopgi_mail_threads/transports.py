@@ -47,6 +47,13 @@ class MailTransportRouter(metaclass(RegisteredType)):
 
     '''
 
+    def __new__(cls, *args, **kwargs):
+        res = getattr(cls, '__singleton__', None)
+        if not res:
+            res = object.__new__(cls, *args, **kwargs)
+            setattr(cls, '__singleton__', res)
+        return res
+
     @classmethod
     def select(cls, obj, cr, uid, message, context=None):
         '''Select a registered transport that can deliver the message.
