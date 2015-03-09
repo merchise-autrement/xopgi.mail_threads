@@ -18,17 +18,18 @@ from __future__ import (division as _py3_division,
 
 from openerp import tools
 from openerp.osv.orm import browse_record, Model
-from openerp.addons.base.ir.ir_model import ir_model_access as base_ir_model_access
+from openerp.addons.base.ir.ir_model import ir_model_access as base
 
 from xoeuf.osv.orm import get_modelname
 
 
 class ir_model_access(Model):
-    _name = get_modelname(base_ir_model_access)
+    _name = get_modelname(base)
     _inherit = _name
 
     @tools.ormcache()
-    def check(self, cr, uid, model, mode='read', raise_exception=True, context=None):
+    def check(self, cr, uid, model, mode='read', raise_exception=True,
+              context=None):
         '''Allow to anyone can `read` from any mail_threads inherited models.
 
         '''
