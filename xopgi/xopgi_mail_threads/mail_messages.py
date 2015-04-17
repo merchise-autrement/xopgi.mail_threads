@@ -83,6 +83,7 @@ class mail_thread(AbstractModel):
         return result
 
 
+# TODO: Move to xoutil after thorough inspection.
 class ReencodingGenerator(Generator):
     '''A generator that re-encodes text bodies to a given charset.
 
