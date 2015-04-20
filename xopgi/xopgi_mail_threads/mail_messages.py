@@ -75,7 +75,7 @@ class mail_thread(AbstractModel):
         from io import BytesIO
         buf = BytesIO()
         # Re-encode to the connection encoding
-        gen = ReencodingGenerator(buf, mangle_from_=False,
+        gen = HeaderOnlyGenerator(buf, mangle_from_=False,
                                   target_charset=cr._cnx.encoding)
         gen.flatten(message)
         message = safe_decode(buf.getvalue(), encoding=cr._cnx.encoding)
@@ -83,6 +83,7 @@ class mail_thread(AbstractModel):
         return result
 
 
+# TODO: Move to xoutil after thorough inspection.
 class ReencodingGenerator(Generator):
     '''A generator that re-encodes text bodies to a given charset.
 

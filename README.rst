@@ -67,8 +67,8 @@ Mail transports are Python new-style classes that inherit from
 
    This is a classmethod.
 
-   Called to know whether this transport can deliver a `message`.  It return
-   value indicates whether the transport can or cannot deliver the message.
+   Called to know whether this transport can deliver a `message`.  It returns
+   whether the transport can or cannot deliver the message.
 
    The `obj` is the `ir.mail_server` object.  Useful to access the `pool` so
    that consulting the DB can be done in the same cursor.
@@ -94,8 +94,8 @@ Mail transports are Python new-style classes that inherit from
    Inside this method the ``send_email`` method of the ``ir.mail_server``
    object can be used and the transport won't be re-elected but another one
    will.  This allows for several transports to kick in and do their magic as
-   pipeline.  Notice this may, however, slow the delivery.  Transports are not
-   meant for the unwary users, but for system designers.  Furthermore, the
+   a pipeline.  Notice this may, however, slows the delivery.  Transports are
+   not meant for the unwary users, but for system designers.  Furthermore, the
    order in which they will be elected is not totally defined.
 
 
