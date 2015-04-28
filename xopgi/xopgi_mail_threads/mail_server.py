@@ -83,11 +83,24 @@ class MailServer(Model):
                     delivered, conndata = False, {}
                     if transport:
                         with transport:
-                            message, conndata = transport.prepare_message(
-                                self, cr, uid, message,
-                                data=querydata,
-                                context=context
-                            )
+                            try:
+                                message, conndata = transport.prepare_message(
+                                    self, cr, uid, message,
+                                    data=querydata,
+                                    context=context
+                                )
+                            except TypeError:
+                                # The transport does not support the data
+                                # keyword argument.  But issue an error level
+                                # warning
+                                _logger.error(
+                                    'Selected transport %s is obsolete',
+                                    repr(transport)
+                                )
+                                message, conndata = transport.prepare_message(
+                                    self, cr, uid, message,
+                                    context=context
+                                )
                             delivered = transport.deliver(
                                 self, cr, uid, message, conndata,
                                 context=context
