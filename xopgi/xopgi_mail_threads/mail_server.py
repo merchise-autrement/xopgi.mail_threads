@@ -93,9 +93,10 @@ class MailServer(Model):
                                 # The transport does not support the data
                                 # keyword argument.  But issue an error level
                                 # warning
+                                from xoutil.names import nameof
                                 _logger.error(
-                                    'Selected transport %s is obsolete',
-                                    repr(transport)
+                                    'Selected transport "%s" is obsolete',
+                                    nameof(transport, full=True, inner=True)
                                 )
                                 message, conndata = transport.prepare_message(
                                     self, cr, uid, message,
