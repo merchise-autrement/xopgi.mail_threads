@@ -75,7 +75,7 @@ class mail_thread(AbstractModel):
         from io import BytesIO
         buf = BytesIO()
         # Re-encode to the connection encoding
-        gen = HeaderOnlyGenerator(buf, mangle_from_=False,
+        gen = ReencodingGenerator(buf, mangle_from_=False,
                                   target_charset=cr._cnx.encoding)
         gen.flatten(message)
         message = safe_decode(buf.getvalue(), encoding=cr._cnx.encoding)
@@ -90,10 +90,15 @@ class ReencodingGenerator(Generator):
     A message with 'text/...' Content-Type will be re-encoded (if needed) to
     the target charset.
 
+    :param chop: Indicates whether to remove non-textual parts in a MIME
+                 message.  If False non-textual parts won't be removed.
+
     '''
     def __init__(self, outfp, mangle_from_=True, maxheaderlen=78,
-                 target_charset='utf-8'):
+                 target_charset='utf-8',
+                 chop=True):
         self._target_charset = target_charset
+        self.chop = chop
         Generator.__init__(
             self,
             outfp,
@@ -107,13 +112,27 @@ class ReencodingGenerator(Generator):
         return result
 
     def _write(self, msg):
-        return Generator._write(self, self._reencode(msg))
+        encoded = self._reencode(msg)
+        if encoded:
+            return Generator._write(self, encoded)
+
+    @staticmethod
+    def istext(msg):
+        '''Whether the message (or part) is acceptable as text.'''
+        if msg.get_content_maintype() == 'text':
+            return True
+        else:
+            ct = msg.get_content_type() or msg.get_default_type()
+            if ct.startswith('message/'):
+                return True
+            else:
+                return False
 
     def _reencode(self, msg):
         from xoutil.string import safe_decode, safe_encode
         from copy import deepcopy
-        if msg.get_content_maintype() != 'text':
-            return msg
+        if not self.istext(msg):
+            return msg if not self.chop else None
         from_charset = msg.get_content_charset() or 'ascii'
         target = self._target_charset
         result = deepcopy(msg)
