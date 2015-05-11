@@ -97,8 +97,11 @@ class ReencodingGenerator(Generator):
     def __init__(self, outfp, mangle_from_=True, maxheaderlen=78,
                  target_charset='utf-8',
                  chop=True):
+        from email.charset import Charset, QP
         self._target_charset = target_charset
         self.chop = chop
+        self.charset = charset = Charset(target_charset)
+        charset.body_encoding = QP
         Generator.__init__(
             self,
             outfp,
@@ -117,34 +120,52 @@ class ReencodingGenerator(Generator):
             return Generator._write(self, encoded)
 
     @staticmethod
-    def istext(msg):
+    def _istext(msg):
         '''Whether the message (or part) is acceptable as text.'''
-        if msg.get_content_maintype() == 'text':
-            return True
-        else:
-            ct = msg.get_content_type() or msg.get_default_type()
-            if ct.startswith('message/'):
-                return True
-            else:
-                return False
+        ct = msg.get_content_type() or msg.get_default_type()
+        types = ('text/', )
+        return any(ct.startswith(t) for t in types)
+
+    @staticmethod
+    def _is_attachment(msg):
+        disposition = msg['Content-Disposition']
+        return disposition and disposition.startswith('attachment;')
 
     def _reencode(self, msg):
         from xoutil.string import safe_decode, safe_encode
         from copy import deepcopy
-        if not self.istext(msg):
-            return msg if not self.chop else None
-        from_charset = msg.get_content_charset() or 'ascii'
-        target = self._target_charset
-        result = deepcopy(msg)
-        payload = result.get_payload(decode=True)
-        newpayload = safe_encode(
-            safe_decode(payload, encoding=from_charset),
-            encoding=target
-        )
-        result.set_payload(newpayload, target)
-        if 'MIME-Version' not in msg:
-            del result['MIME-Version']
-        return result
+        if self._istext(msg) and not self._is_attachment(msg):
+            from_charset = msg.get_content_charset() or 'ascii'
+            target = self._target_charset
+            # The `decode` should handle the Content-Transfer-Encoding, thus
+            # we removed the header from the resulting message so that
+            # set_payload reintroduce the proper one if needed.
+            payload = msg.get_payload(decode=True)
+            if payload:
+                result = deepcopy(msg)
+                newpayload = safe_encode(
+                    safe_decode(payload, encoding=from_charset),
+                    encoding=target
+                )
+                result.set_payload(newpayload, self.charset)
+                # MIME-Version can be introduced by set_payload, remove it if
+                # the original message didn't have it.
+                if 'MIME-Version' not in msg:
+                    del result['MIME-Version']
+            else:
+                result = msg
+            return result
+        elif msg.is_multipart() or not self.chop:
+            return msg
+        else:
+            # If the message is not a text message worth keeping return an
+            # empty part.
+            from email.message import Message
+            result = Message()
+            result.set_payload('[Removed part]', self.charset)
+            if 'MIME-Version' not in msg:
+                del result['MIME-Version']
+            return result
 
 
 class HeaderOnlyGenerator(Generator):
