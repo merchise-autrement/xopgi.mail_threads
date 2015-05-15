@@ -98,11 +98,16 @@ class MailServer(Model):
                         kw.update((key, val) for key, val in data.items()
                                   if valid and key in valid)
                         kw['context'] = context
-            except:
-                _logger.exception(
-                    'Transport %s failed. Falling back',
-                    transport
-                )
+            except Exception as e:
+                from openerp.addons.base.ir.ir_mail_server import \
+                    MailDeliveryException
+                if not isinstance(e, MailDeliveryException):
+                    _logger.exception(
+                        'Transport %s failed. Falling back',
+                        transport
+                    )
+                else:
+                    raise
         return _super(cr, uid, message, **kw)
 
     def send_without_transports(self, cr, uid, message, **kw):

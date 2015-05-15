@@ -147,7 +147,14 @@ class MailTransportRouter(metaclass(RegisteredType)):
         return TransportRouteData(message, {})
 
     def get_message_objects(self, obj, cr, uid, message, context=None):
-        '''Get the mail.message browse records for the `message` .
+        '''Get the mail.message browse record for the `message` .
+
+        :returns: A tuple ``(msg, refs)`` where the `msg` is the mail.message
+           browse record and the refs is a list of mail.message browse records
+           of the references in the `message`.
+
+        If the message's Message-Id is not found `msg` is set to None.  If any
+        of references is not found it won't be included the `refs` list.
 
         '''
         from xoeuf.osv.model_extensions import search_browse

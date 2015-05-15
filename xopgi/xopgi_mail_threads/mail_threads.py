@@ -64,8 +64,9 @@ class mail_thread(AbstractModel):
             # keep it safe here to restore if needed.
             routes_copy = routes[:]
             try:
-                if is_router_installed(cr, uid, router) and router.is_applicable(cr, uid, message):
-                    router.apply(cr, uid, routes, message)
+                if is_router_installed(cr, uid, router) \
+                   and router.is_applicable(self, cr, uid, message):
+                    router.apply(self, cr, uid, routes, message)
             except:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
