@@ -61,9 +61,6 @@ class MailRouterType(RegisteredType):
         return super(MailRouterType, cls).__new__(cls, name, bases, attrs)
 
 
-# TODO: Check the metaclass reliability.
-#
-# I'm worried about how this classes are loaded in the OpenERP processes.
 # Since the metaclass will register all classes derived from MailRouter, and
 # those classes may actually be non-suitable to all databases, the cr and uid
 # arguments were introduced for that reason.
