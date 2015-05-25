@@ -33,12 +33,14 @@ class mail_thread(AbstractModel):
     def _merge_history(self, cr, uid, target_thread_id, previous_threads,
                        context=None):
         'Transfer messages from previous_threads to target_thread.'
-        message = self.pool.get('mail.message')
-        for thread in previous_threads:
-            for history in thread.message_ids:
-                message.write(cr, uid, history.id, {
-                    'res_id': target_thread_id,
-                }, context=context)
+        Messages = self.pool.get('mail.message')
+        Messages.write(
+            cr, uid,
+            sum([m.id for m in thread.message_ids]
+                for thread in previous_threads),
+            {'res_id': target_thread_id, },
+            context=context
+        )
         return True
 
     def _merge_attachments(self, cr, uid, target_thread_id, previous_threads,
