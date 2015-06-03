@@ -168,7 +168,8 @@ class MailTransportRouter(metaclass(RegisteredType)):
         '''
         return TransportRouteData(message, {})
 
-    def get_message_objects(self, obj, cr, uid, message, context=None):
+    @classmethod
+    def get_message_objects(cls, obj, cr, uid, message, context=None):
         '''Get the mail.message browse record for the `message` .
 
         :returns: A tuple ``(msg, refs)`` where the `msg` is the mail.message
