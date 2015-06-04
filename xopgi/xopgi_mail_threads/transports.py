@@ -110,12 +110,10 @@ class MailTransportRouter(metaclass(RegisteredType)):
         Return True if the transport can deliver the message and False,
         otherwise.
 
-        .. versionadded:: 2.4
-
-        You may also return a tuple of ``(result, data)``.  The first
-        component should be the boolean value as before.  The ``data`` part is
-        an object that will be passed as the ``data`` keyword argument of the
-        `prepare_message`:meth: method.
+        .. versionchanged:: 2.5 You may also return a tuple of ``(result,
+           data)``.  The first component should be the boolean value as
+           before.  The ``data`` part is an object that will be passed as the
+           ``data`` keyword argument of the `prepare_message`:meth: method.
 
         This is useful to avoid computing things twice in `query` and in
         `prepare_message`:meth:.
@@ -164,6 +162,8 @@ class MailTransportRouter(metaclass(RegisteredType)):
         The ``data`` keyword argument is the second component if the return
         value of the `query`:meth: method.  You may use that data to avoid
         redoing stuff you did in the `query` method.
+
+        .. versionchanged:: 2.5  Added the `data` argument.
 
         '''
         return TransportRouteData(message, {})
