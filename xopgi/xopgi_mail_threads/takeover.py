@@ -35,8 +35,8 @@ class mail_thread(AbstractModel):
         'Transfer messages from previous_threads to target_thread.'
         Messages = self.pool.get('mail.message')
         ids = []
-        [ids.extend([m.id for m in thread.message_ids]) for thread in
-         previous_threads]
+        for thread in previous_threads:
+            ids.extend(m.id for m in thread.message_ids)
         if ids:
             Messages.write(
                 cr, uid,
@@ -58,9 +58,8 @@ class mail_thread(AbstractModel):
             return attachments
         attach_obj = self.pool.get('ir.attachment')
         ids = []
-        [ids.extend(_get_attachments(thread.id)) for thread in
-         previous_threads]
-
+        for thread in previous_threads:
+            ids.extend(_get_attachments(thread.id))
         if ids:
             attach_obj.write(
                 cr, uid,
