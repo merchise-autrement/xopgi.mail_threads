@@ -34,13 +34,16 @@ class mail_thread(AbstractModel):
                        context=None):
         'Transfer messages from previous_threads to target_thread.'
         Messages = self.pool.get('mail.message')
-        Messages.write(
-            cr, uid,
-            sum([m.id for m in thread.message_ids]
-                for thread in previous_threads),
-            {'res_id': target_thread_id, },
-            context=context
-        )
+        ids = []
+        for thread in previous_threads:
+            ids.extend(m.id for m in thread.message_ids)
+        if ids:
+            Messages.write(
+                cr, uid,
+                ids,
+                {'res_id': target_thread_id, },
+                context=context
+            )
         return True
 
     def _merge_attachments(self, cr, uid, target_thread_id, previous_threads,
@@ -54,12 +57,16 @@ class mail_thread(AbstractModel):
             )
             return attachments
         attach_obj = self.pool.get('ir.attachment')
-        attach_obj.write(
-            cr, uid,
-            sum(_get_attachments(thread) for thread in previous_threads),
-            {'res_id': target_thread_id, },
-            context=context
-        )
+        ids = []
+        for thread in previous_threads:
+            ids.extend(_get_attachments(thread.id))
+        if ids:
+            attach_obj.write(
+                cr, uid,
+                ids,
+                {'res_id': target_thread_id, },
+                context=context
+            )
         return True
 
     def takeover_messages(self, cr, uid, target_thread_id, previous_ids,
