@@ -41,14 +41,7 @@ from xoeuf.osv.orm import get_modelname
 from openerp.osv.orm import AbstractModel
 from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
-# Backwards-compatible fix.
-from xoutil.deprecation import deprecated
 from xoutil import logger as _logger
-
-from .routers import MailRouter
-MailRouter = deprecated(MailRouter)(MailRouter)
-
-del deprecated, MailRouter
 
 
 class mail_thread(AbstractModel):
