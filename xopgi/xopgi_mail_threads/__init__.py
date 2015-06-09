@@ -16,7 +16,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         unicode_literals as _py3_unicode,
                         absolute_import as _py3_abs_import)
-from . import ir_model_access
+
+from . import ir_model_access  # noqa
 from . import mail_messages  # noqa
 from . import mail_threads  # noqa
 from . import mail_server  # noqa
@@ -42,4 +43,3 @@ def post_load_hook():
     from openerp.addons import mail
     assert getattr(mail, 'xopgi', False), \
         'You must use a recent Odoo packaged by Merchise Autrement'
-
