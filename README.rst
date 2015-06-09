@@ -49,12 +49,26 @@ to actually do the routing.
 
    class MyRouter(MailRouter):
        @classmethod
-       def is_applicable(cls, cr, uid, message):
+       def is_applicable(cls, obj, cr, uid, message):
           return False
 
        @classmethod
-       def apply(cls, cr, uid, routes, message):
+       def apply(cls, obj, cr, uid, routes, message):
            return routes
+
+The `obj` argument is the ``mail.thread`` object for the current DB.  The `cr`
+and `uid` arguments are the normal OpenERP-style [#odoo-style] arguments for
+models.  The `message` argument is message being processed.
+
+The `routes` argument for the method ``apply()`` is the routes detected so
+far.
+
+.. note:: The `obj` argument was introduced in version 2.4 of this addon.
+
+   Routers without the `obj` argument (the "old" API), are still supported.
+   Nevertheless future versions of this addons will remove support for routers
+   without the `obj` argument.
+
 
 
 Mail transports
@@ -104,3 +118,8 @@ Mail transports are Python new-style classes that inherit from
 .. _OpenERP: Odoo_
 .. _Odoo: http://github.com/odoo/odoo
 .. _xoeuf: http://github.com/merchise-autrement/xoeuf
+
+..
+   Local Variables:
+   ispell-dictionary: "en"
+   End:

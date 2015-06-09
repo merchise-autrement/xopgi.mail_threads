@@ -16,18 +16,55 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+import warnings
 from xoutil.objects import metaclass
 
 from .utils import RegisteredType
 
 
-# TODO: Check the metaclass reliability.
-#
-# I'm worried about how this classes are loaded in the OpenERP processes.
+# The following is a trick to allow old routers to work for now.
+class MailRouterType(RegisteredType):
+    _new_api = {
+        'is_applicable': ('obj', 'cr', 'uid', 'message'),
+        'apply': ('obj', 'cr', 'uid', 'routes', 'message')
+    }
+
+    @classmethod
+    def wrap(cls, clsname, name, clsmethod):
+        '''Wrap a router method if old API.'''
+        from functools import wraps
+        from xoutil.inspect import getfullargspec
+        args = getfullargspec(clsmethod.__func__)[0][1:]
+        if len(args) != len(cls._new_api[name]):
+            warnings.warn('The method %s of router %s uses a '
+                          'deprecated API' % (name, clsname),
+                          stacklevel=3)
+            func = clsmethod.__func__
+
+            @classmethod
+            @wraps(func)
+            def result(cls, obj, cr, uid, *a):
+                return func(cls, cr, uid, *a)
+            return result
+        else:
+            return clsmethod
+
+    def __new__(cls, name, bases, attrs):
+        attrs = {
+            attr: (
+                cls.wrap(name, attr, val)
+                if attr in cls._new_api and isinstance(val, classmethod)
+                else val
+            )
+            for attr, val in attrs.items()
+        }
+        return super(MailRouterType, cls).__new__(cls, name, bases, attrs)
+
+
 # Since the metaclass will register all classes derived from MailRouter, and
 # those classes may actually be non-suitable to all databases, the cr and uid
 # arguments were introduced for that reason.
-class MailRouter(metaclass(RegisteredType)):
+class MailRouter(metaclass(MailRouterType)):
     '''A router for mail to objects inside OpenERP.
 
     A router is an "after the fact" mechanism for the routing mechanism
@@ -59,11 +96,12 @@ class MailRouter(metaclass(RegisteredType)):
     '''
 
     @classmethod
-    def is_applicable(cls, cr, uid, message):
+    def is_applicable(cls, obj, cr, uid, message):
         '''Return True if the router is applicable to the message.
 
         This is defined as weak test, but strong tests are encouraged.
 
+        :param obj:  The mail.thread object.
         :param cr: The OpenERP cursor for the database.
         :param uid: The UID of the user.
 
@@ -79,7 +117,7 @@ class MailRouter(metaclass(RegisteredType)):
             raise NotImplementedError()
 
     @classmethod
-    def apply(cls, cr, uid, routes, message):
+    def apply(cls, obj, cr, uid, routes, message):
         '''Transform if needed the `routes` according to the message.
 
         :param routes: The routes as previously left by OpenERP and possible

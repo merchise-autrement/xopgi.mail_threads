@@ -64,8 +64,9 @@ class mail_thread(AbstractModel):
             # keep it safe here to restore if needed.
             routes_copy = routes[:]
             try:
-                if is_router_installed(cr, uid, router) and router.is_applicable(cr, uid, message):
-                    router.apply(cr, uid, routes, message)
+                if is_router_installed(cr, uid, router) \
+                   and router.is_applicable(self, cr, uid, message):
+                    router.apply(self, cr, uid, routes, message)
             except:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
@@ -84,20 +85,50 @@ class mail_thread(AbstractModel):
         return routes
 
     if ODOO_VERSION_INFO < (8, 0):
-        def message_route(self, cr, uid, message, model=None, thread_id=None,
-                          custom_values=None, context=None):
+        def message_route(self, cr, uid, rawmessage, model=None,
+                          thread_id=None, custom_values=None, context=None):
             _super = super(mail_thread, self).message_route
-            result = _super(cr, uid, message, model=model, thread_id=thread_id,
-                            custom_values=custom_values, context=context)
-            return self._customize_routes(cr, uid, message, result)
+            result = []
+            error = None
+            try:
+                result = _super(cr, uid, rawmessage, model=model,
+                                thread_id=thread_id,
+                                custom_values=custom_values, context=context)
+            except ValueError as error:
+                # super's message_route method may raise a ValueError if it
+                # finds no route, we want to wait to see if we can find a
+                # custom route before raising the ValueError.
+                pass
+            result = self._customize_routes(cr, uid, rawmessage, result or [])
+            if result:
+                return result
+            elif error:
+                raise error
+            else:
+                assert False
     else:
+        # Odoo introduced a new positional argument: ``message`` which
+        # contains the parsed message, we still rely on the rawmessage.
         def message_route(self, cr, uid, rawmessage, message, model=None,
                           thread_id=None, custom_values=None, context=None):
             _super = super(mail_thread, self).message_route
-            result = _super(cr, uid, rawmessage, message, model=model,
-                            thread_id=thread_id,
-                            custom_values=custom_values, context=context)
-            return self._customize_routes(cr, uid, rawmessage, result)
+            result = []
+            error = None
+            try:
+                result = _super(cr, uid, rawmessage, message, model=model,
+                                thread_id=thread_id,
+                                custom_values=custom_values,
+                                context=context)
+            except ValueError as error:
+                # See the comment in the OpenERP version.
+                pass
+            result = self._customize_routes(cr, uid, rawmessage, result or [])
+            if result:
+                return result
+            elif error:
+                raise error
+            else:
+                pass
 
 
 del metaclass, get_modelname, AbstractModel

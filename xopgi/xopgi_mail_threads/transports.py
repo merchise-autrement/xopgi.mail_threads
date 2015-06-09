@@ -61,21 +61,29 @@ class MailTransportRouter(metaclass(RegisteredType)):
         No order is warranted about how to select any transport that can
         deliver a message.
 
+        Return a tuple of ``(transport, query_data)`` where `transport` if an
+        instance of the selected transport and `query_data` is data returned
+        by the `query` method of the transport selected or None.
+
         '''
         from .utils import is_router_installed
-        from xoutil.context import context
+        from xoutil.context import Context
         candidates = (transport for transport in MailTransportRouter.registry
                       if is_router_installed(cr, uid, transport)
-                      if transport.context_name not in context)
-        found, transport = False, None
+                      if transport.context_name not in Context)
+        found, transport, data = False, None, None
         candidate = next(candidates, None)
         while not found and candidate:
-            found = candidate.query(obj, cr, uid, message, context=context)
+            res = candidate.query(obj, cr, uid, message, context=context)
+            if isinstance(res, tuple):
+                found, data = res
+            else:
+                found, data = res, None
             if found:
                 transport = candidate
             else:
                 candidate = next(candidates, None)
-        return transport() if transport else None
+        return (transport(), data) if transport else (None, None)
 
     @classproperty
     def context_name(cls):
@@ -99,13 +107,21 @@ class MailTransportRouter(metaclass(RegisteredType)):
     def query(cls, obj, cr, uid, message, context=None):
         '''Respond if the transport router can deliver the message.
 
-        Returns True if the transport can deliver the message and False,
+        Return True if the transport can deliver the message and False,
         otherwise.
+
+        .. versionchanged:: 2.5 You may also return a tuple of ``(result,
+           data)``.  The first component should be the boolean value as
+           before.  The ``data`` part is an object that will be passed as the
+           ``data`` keyword argument of the `prepare_message`:meth: method.
+
+        This is useful to avoid computing things twice in `query` and in
+        `prepare_message`:meth:.
 
         '''
         raise NotImplemented()
 
-    def deliver(self, obj, cr, uid, message, data, context=None):
+    def deliver(self, server, cr, uid, message, data, context=None):
         '''Deliver if possible the message.
 
         Return False if the transport won't do the delivery directly.  This
@@ -129,9 +145,10 @@ class MailTransportRouter(metaclass(RegisteredType)):
         not defined.
 
         '''
-        return False
+        kwargs = dict(data or {}, context=context)
+        return server.send_email(cr, uid, message, **kwargs)
 
-    def prepare_message(self, obj, cr, uid, message, context=None):
+    def prepare_message(self, obj, cr, uid, message, data=None, context=None):
         '''Prepares the message to be delivered.
 
         Returns a named tuple TransportRouteData with ``(message,
@@ -142,11 +159,25 @@ class MailTransportRouter(metaclass(RegisteredType)):
         ``send_email`` method of ``ir.mail_server`` how to send it if the
         `deliver`:func: indicates it.
 
+        The ``data`` keyword argument is the second component if the return
+        value of the `query`:meth: method.  You may use that data to avoid
+        redoing stuff you did in the `query` method.
+
+        .. versionchanged:: 2.5  Added the `data` argument.
+
         '''
         return TransportRouteData(message, {})
 
-    def get_message_objects(self, obj, cr, uid, message, context=None):
-        '''Get the mail.message browse records for the `message` .
+    @classmethod
+    def get_message_objects(cls, obj, cr, uid, message, context=None):
+        '''Get the mail.message browse record for the `message` .
+
+        :returns: A tuple ``(msg, refs)`` where the `msg` is the mail.message
+           browse record and the refs is a list of mail.message browse records
+           of the references in the `message`.
+
+        If the message's Message-Id is not found `msg` is set to None.  If any
+        of references is not found it won't be included the `refs` list.
 
         '''
         from xoeuf.osv.model_extensions import search_browse

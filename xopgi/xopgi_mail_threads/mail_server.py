@@ -77,32 +77,48 @@ class MailServer(Model):
                 smtp_server = kw.get('smtp_server', None)
                 context = kw.pop('context', {})
                 if neither(mail_server_id, smtp_server):
-                    transport = transports.select(
+                    transport, querydata = transports.select(
                         self, cr, uid, message, context=context
                     )
-                    delivered, data = False, {}
+                    delivered, conndata = False, {}
                     if transport:
                         with transport:
-                            message, data = transport.prepare_message(
-                                self, cr, uid, message, context=context
-                            )
+                            try:
+                                message, conndata = transport.prepare_message(
+                                    self, cr, uid, message,
+                                    data=querydata,
+                                    context=context
+                                )
+                            except TypeError:
+                                # The transport does not support the data
+                                # keyword argument, fallback to the old
+                                # data-less API.
+                                message, conndata = transport.prepare_message(
+                                    self, cr, uid, message,
+                                    context=context
+                                )
                             delivered = transport.deliver(
-                                self, cr, uid, message, data,
+                                self, cr, uid, message, conndata,
                                 context=context
                             )
                     if delivered:
                         return delivered
-                    elif data:
-                        context.update(data.pop('context', {}))
+                    elif conndata:
+                        context.update(conndata.pop('context', {}))
                         valid = get_kwargs(_super)
-                        kw.update((key, val) for key, val in data.items()
+                        kw.update((key, val) for key, val in conndata.items()
                                   if valid and key in valid)
                         kw['context'] = context
-            except:
-                _logger.exception(
-                    'Transport %s failed. Falling back',
-                    transport
-                )
+            except Exception as e:
+                from openerp.addons.base.ir.ir_mail_server import \
+                    MailDeliveryException
+                if not isinstance(e, MailDeliveryException):
+                    _logger.exception(
+                        'Transport %s failed. Falling back',
+                        transport
+                    )
+                else:
+                    raise
         return _super(cr, uid, message, **kw)
 
     def send_without_transports(self, cr, uid, message, **kw):
