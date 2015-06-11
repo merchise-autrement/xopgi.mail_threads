@@ -48,7 +48,7 @@ class mail_thread(AbstractModel):
     _name = get_modelname(_base_mail_thread)
     _inherit = _name
 
-    def _customize_routes(self, cr, uid, message, routes):
+    def _customize_routes(self, cr, uid, message, routes, context=None):
         from .utils import is_router_installed
         from .routers import MailRouter
         for router in MailRouter.registry:
@@ -56,9 +56,16 @@ class mail_thread(AbstractModel):
             # keep it safe here to restore if needed.
             routes_copy = routes[:]
             try:
-                if is_router_installed(cr, uid, router) \
-                   and router.is_applicable(self, cr, uid, message):
-                    router.apply(self, cr, uid, routes, message)
+                if is_router_installed(cr, uid, router):
+                    result = router.query(self, cr, uid, message,
+                                          context=context)
+                    if isinstance(result, tuple):
+                        valid, data = result
+                    else:
+                        valid, data = result, None
+                    if valid:
+                        router.apply(self, cr, uid, routes, message,
+                                     data=data, context=context)
             except:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
@@ -91,7 +98,8 @@ class mail_thread(AbstractModel):
             # no route, we want to wait to see if we can find a custom route
             # before raising the ValueError.
             pass
-        result = self._customize_routes(cr, uid, rawmessage, result or [])
+        result = self._customize_routes(cr, uid, rawmessage, result or [],
+                                        context=context)
         if result:
             return result
         elif error:
