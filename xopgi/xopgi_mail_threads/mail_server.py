@@ -80,35 +80,17 @@ class MailServer(Model):
                     transport, querydata = transports.select(
                         self, cr, uid, message, context=context
                     )
-                    delivered, conndata = False, {}
                     if transport:
                         with transport:
-                            try:
-                                message, conndata = transport.prepare_message(
-                                    self, cr, uid, message,
-                                    data=querydata,
-                                    context=context
-                                )
-                            except TypeError:
-                                # The transport does not support the data
-                                # keyword argument, fallback to the old
-                                # data-less API.
-                                message, conndata = transport.prepare_message(
-                                    self, cr, uid, message,
-                                    context=context
-                                )
-                            delivered = transport.deliver(
+                            message, conndata = transport.prepare_message(
+                                self, cr, uid, message,
+                                data=querydata,
+                                context=context
+                            )
+                            return transport.deliver(
                                 self, cr, uid, message, conndata,
                                 context=context
                             )
-                    if delivered:
-                        return delivered
-                    elif conndata:
-                        context.update(conndata.pop('context', {}))
-                        valid = get_kwargs(_super)
-                        kw.update((key, val) for key, val in conndata.items()
-                                  if valid and key in valid)
-                        kw['context'] = context
             except Exception as e:
                 from openerp.addons.base.ir.ir_mail_server import \
                     MailDeliveryException

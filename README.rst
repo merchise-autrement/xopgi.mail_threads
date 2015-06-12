@@ -39,36 +39,33 @@ Mail routers
 ------------
 
 Mail routers are Python new-style classes that inherit from ``MailRouter``.
-They must implement the ``is_applicable()`` class method to test whether a
-message should be routed using this router, and the class method ``apply()``
-to actually do the routing.
 
-::
+They must implement following methods:
 
-   from openerp.addons.xopgi_mail_threads import MailRouter
+- ``query(cls, obj, cr, uid, message, context=None)``
 
-   class MyRouter(MailRouter):
-       @classmethod
-       def is_applicable(cls, obj, cr, uid, message):
-          return False
+  A class method to test whether a message should be routed using this
+  router.  It must return either:
 
-       @classmethod
-       def apply(cls, obj, cr, uid, routes, message):
-           return routes
+  - A single boolean value to indicate whether the router can route the
+    message or not.
 
-The `obj` argument is the ``mail.thread`` object for the current DB.  The `cr`
-and `uid` arguments are the normal OpenERP-style [#odoo-style] arguments for
-models.  The `message` argument is message being processed.
+  - A tuple ``(routeable, data)`` whose first component is the same boolean
+    value as before and the second component is an opaque object that is
+    passed to the `apply` method as the `data` keyword argument.
 
-The `routes` argument for the method ``apply()`` is the routes detected so
-far.
+  The `obj` argument will be the ``mail.thread`` object.  `message` is the
+  parsed message being received.
 
-.. note:: The `obj` argument was introduced in version 2.4 of this addon.
+- ``apply(cls, obj, cr, uid, routes, message, data=None, context=None):``
 
-   Routers without the `obj` argument (the "old" API), are still supported.
-   Nevertheless future versions of this addons will remove support for routers
-   without the `obj` argument.
+  A class method that will only called if `query` returned True or ``(True,
+  data)``.
 
+  `routes` will be previously detected routes by standard Odoo routing
+  mechanisms or possible other routes.
+
+  You must change `routes` in place to either remove or add routes.
 
 
 Mail transports
@@ -87,8 +84,14 @@ Mail transports are Python new-style classes that inherit from
    The `obj` is the `ir.mail_server` object.  Useful to access the `pool` so
    that consulting the DB can be done in the same cursor.
 
+   The result must be either a single boolean value indicating if the
+   transport can deliver the message, or a tuple ``(deliverable, data)`` whose
+   first component is the same boolean value, and the second is an opaque
+   object that is going to be passed as the keyword argument `data` of
+   `prepare_message`.
 
-``prepare_message(obj, cr, uid, message, context=None)``
+
+``prepare_message(obj, cr, uid, message, data=None, context=None)``
 
    This is called for the *selected* transport that will deliver the message.
 
@@ -98,19 +101,43 @@ Mail transports are Python new-style classes that inherit from
    message that should be sent and the connection data that should be used as
    arguments for the ``send_email`` method of ``ir.mail_server``.
 
+   The `data` keyword argument is the second component of the return value of
+   `query`.
+
 
 ``deliver(obj, cr, uid, message, data, context=None)``
 
    Deliver the message if possible.
 
-   Return False to fallback to OpenERP's default implementation.
+   Return False to indicate the message was not sent.
 
-   Inside this method the ``send_email`` method of the ``ir.mail_server``
-   object can be used and the transport won't be re-elected but another one
-   will.  This allows for several transports to kick in and do their magic as
-   a pipeline.  Notice this may, however, slows the delivery.  Transports are
-   not meant for the unwary users, but for system designers.  Furthermore, the
-   order in which they will be elected is not totally defined.
+   .. note:: Before 3.0 False would indicate to fallback to OpenERP's default.
+      This is no longer true.  We will only fallback if the transport fails
+      with an exception other than ``MailDeliveryException``.
+
+   Inside this method you may call the ``send_email`` method of the
+   ``ir.mail_server`` object and the current transport won't be re-elected but
+   another one will.  This allows for several transports to kick in and do
+   their magic as a pipeline.  Notice this may, however, slows the delivery.
+   Transports are not meant for the unwary users, but for system designers.
+   Furthermore, the order in which they will be elected is not totally
+   defined.  The default implementation the `delivery` method simply calls
+   ``send_mail``.
+
+
+Changes in 3.0
+==============
+
+The old API was dropped:
+
+- MailRouter now must implement a `query` method instead of the old
+  `is_applicable`.
+
+- Routers and transporters are now required to accept the `obj` argument as
+  the first positional argument.
+
+- Routers and transporters are required to accept the `data` keyword
+  argument.
 
 
 .. _buildout: http://buildout.org/
