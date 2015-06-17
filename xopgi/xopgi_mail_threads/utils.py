@@ -52,6 +52,8 @@ def is_router_installed(cr, uid, router):
         return False
 
 
+# TODO: Move these to xoutil.  For that I need first to port the
+# `decode_header` from future email.
 def set_message_address_header(message, header, value, address_only=False):
     if address_only:
         previous = decode_header(message, header)
