@@ -78,7 +78,14 @@ class MailTransportRouter(metaclass(RegisteredType)):
         found, transport, data = False, None, None
         candidate = next(candidates, None)
         while not found and candidate:
-            res = candidate.query(obj, cr, uid, message, context=context)
+            try:
+                res = candidate.query(obj, cr, uid, message, context=context)
+            except:
+                _logger.exception(
+                    'Candidate transport %s failed. Proceeding with another',
+                    candidate
+                )
+                res = False
             if isinstance(res, tuple):
                 found, data = res
             else:

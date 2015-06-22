@@ -105,6 +105,6 @@ class mail_thread(AbstractModel):
         elif error:
             raise error
         else:
-            pass
+            return []
 
 del metaclass, get_modelname, AbstractModel
