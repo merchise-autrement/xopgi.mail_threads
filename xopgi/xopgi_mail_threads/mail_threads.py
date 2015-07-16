@@ -36,6 +36,8 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from xoutil.objects import metaclass
+from xoutil.string import safe_encode
+
 from xoeuf.osv.orm import get_modelname
 
 from openerp.osv.orm import AbstractModel
@@ -70,7 +72,6 @@ class mail_thread(AbstractModel):
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
         if not routes:
-            from xoutil.string import safe_encode
             from xoutil import logger
             import email
             from email.message import Message
@@ -78,8 +79,8 @@ class mail_thread(AbstractModel):
                 message = email.message_from_string(safe_encode(message))
             logger.warn(
                 "No routes found for message '%s' sent by '%s'",
-                message.get('Message-Id', 'No ID!'),
-                message.get('Sender', message.get('From', '<>'))
+                safe_encode(message.get('Message-Id', 'No ID!')),
+                safe_encode(message.get('Sender', message.get('From', '<>')))
             )
         return routes
 
