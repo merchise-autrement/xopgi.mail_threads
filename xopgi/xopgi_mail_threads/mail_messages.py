@@ -135,7 +135,7 @@ class ReencodingGenerator(Generator):
         from xoutil.string import safe_decode, safe_encode
         from copy import deepcopy
         if self._istext(msg) and not self._is_attachment(msg):
-            from_charset = msg.get_content_charset() or 'ascii'
+            from_charset = _get_content_chartset(msg, 'ascii')
             target = self._target_charset
             # The `decode` should handle the Content-Transfer-Encoding, thus
             # we removed the header from the resulting message so that
@@ -166,6 +166,21 @@ class ReencodingGenerator(Generator):
             if 'MIME-Version' not in msg:
                 del result['MIME-Version']
             return result
+
+
+def _get_content_chartset(msg, default='ascii'):
+    '''Extract the content chartset of the message.
+
+    '''
+    from xoutil.string import cut_prefixes, cut_suffixes
+    assert default
+    return cut_suffixes(
+        cut_prefixes(
+            msg.get_content_charset(default),
+            'charset=', '"', '\''
+        ),
+        '"', '\''
+    )
 
 
 class HeaderOnlyGenerator(Generator):
