@@ -97,7 +97,11 @@ class MailServer(Model):
                 if not isinstance(e, MailDeliveryException):
                     _logger.exception(
                         'Transport %s failed. Falling back',
-                        transport
+                        transport,
+                        extra=dict(message_from=message.get('From'),
+                                   message_to=message.get('To'),
+                                   message_cc=message.get('Cc'),
+                                   message_subject=message.get('Subject'))
                     )
                 else:
                     raise
