@@ -168,6 +168,8 @@ class ReencodingGenerator(Generator):
             return result
 
 
+# TODO: Do a proper parsing of the header value since other parameter may be
+# included in the future and the order should not matter.
 def _get_content_chartset(msg, default='ascii'):
     '''Extract the content chartset of the message.
 
