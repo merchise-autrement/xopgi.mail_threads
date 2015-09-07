@@ -23,9 +23,6 @@ except ImportError:
 from .utils import RegisteredType
 
 
-# Since the metaclass will register all classes derived from MailRouter, and
-# those classes may actually be non-suitable to all databases, the cr and uid
-# arguments were introduced.
 class MailRouter(metaclass(RegisteredType)):
     '''A router for mail to objects inside OpenERP.
 
