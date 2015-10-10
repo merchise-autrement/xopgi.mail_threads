@@ -78,9 +78,16 @@ class mail_thread(AbstractModel):
             if not isinstance(message, Message):
                 message = email.message_from_string(safe_encode(message))
             logger.warn(
-                "No routes found for message '%s' sent by '%s'",
-                safe_encode(message.get('Message-Id', 'No ID!')),
-                safe_encode(message.get('Sender', message.get('From', '<>')))
+                "No routes found for message.",
+                extra=dict(
+                    message_id=message.get('Message-Id', '<>'),
+                    sender=message.get('Sender', message.get('From', '<>')),
+                    recipients=[
+                        message.get('To'),
+                        message.get('Delivered-To'),
+                        message.get('Cc'),
+                    ]
+                )
             )
         return routes
 
