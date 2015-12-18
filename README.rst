@@ -38,7 +38,15 @@ Usage
 Mail routers
 ------------
 
-Mail routers are Python new-style classes that inherit from ``MailRouter``.
+Mail routers are used whenever an email reaches the Odoo.  Its job is to
+perform an action in response to an email.  Normally the action performed is
+to create a new object or place the email inside an existing thread.
+
+Odoo has a limited way to treat incoming messages.  Mail routers allow you to
+extend Odoo's capabilities.
+
+Mail routers are implemented with Python new-style classes that inherit from
+``MailRouter``.
 
 They must implement following methods:
 
@@ -71,8 +79,13 @@ They must implement following methods:
 Mail transports
 ---------------
 
-Mail transports are Python new-style classes that inherit from
-``MailTransportRouter``.  Transports must implement the following methods:
+Mail transports are involved whenever an email needs to be sent.  An outgoing
+email may be both transformed before delivery and delivered using non-standard
+ways.
+
+Mail transports are implemented with Python new-style classes that inherit
+from ``MailTransportRouter``.  Transports must implement the following
+methods:
 
 ``query(obj, cr, uid, message, context=None)``
 
@@ -138,7 +151,6 @@ The old API was dropped:
 
 - Routers and transporters are required to accept the `data` keyword
   argument.
-
 
 .. _buildout: http://buildout.org/
 .. _OpenERP/Odoo: Odoo_
