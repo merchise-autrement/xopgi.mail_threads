@@ -83,6 +83,11 @@ class mail_thread(AbstractModel):
         return result
 
 
+HEADERS_TO_COPY = {
+    'Content-Disposition': 'X-Original-Content-Disposition',
+}
+
+
 # TODO: Move to xoutil after thorough inspection.
 class ReencodingGenerator(Generator):
     '''A generator that re-encodes text bodies to a given charset.
@@ -162,6 +167,8 @@ class ReencodingGenerator(Generator):
             # empty part.
             from email.message import Message
             result = Message()
+            for header, target in HEADERS_TO_COPY:
+                result[target] = msg[header]
             result.set_payload('[Removed part]', self.charset)
             if 'MIME-Version' not in msg:
                 del result['MIME-Version']
