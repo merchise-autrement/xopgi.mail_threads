@@ -167,7 +167,7 @@ class ReencodingGenerator(Generator):
             # empty part.
             from email.message import Message
             result = Message()
-            for header, target in HEADERS_TO_COPY:
+            for header, target in HEADERS_TO_COPY.items():
                 result[target] = msg[header]
             result.set_payload('[Removed part]', self.charset)
             if 'MIME-Version' not in msg:
