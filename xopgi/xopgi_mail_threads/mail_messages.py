@@ -165,14 +165,18 @@ class ReencodingGenerator(Generator):
         else:
             # If the message is not a text message worth keeping return an
             # empty part.
-            from email.message import Message
-            result = Message()
-            for header, target in HEADERS_TO_COPY.items():
-                result[target] = msg[header]
-            result.set_payload('[Removed part]', self.charset)
-            if 'MIME-Version' not in msg:
-                del result['MIME-Version']
-            return result
+            return _chopped(msg, self.charset)
+
+
+def _chopped(msg, charset):
+    from email.message import Message
+    result = Message()
+    for header, target in HEADERS_TO_COPY.items():
+        result[target] = msg[header]
+    result.set_payload('[Removed part]', charset)
+    if 'MIME-Version' not in msg:
+        del result['MIME-Version']
+    return result
 
 
 def _get_content_chartset(msg, default='ascii'):
