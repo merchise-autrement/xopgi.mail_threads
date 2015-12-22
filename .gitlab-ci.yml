@@ -1,0 +1,4 @@
+---
+# Standard gitlab ci configuration file.
+job1:
+  script: merchise_lint
