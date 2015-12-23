@@ -1,0 +1,3 @@
+#!/bin/sh
+
+merchise_lint_pre_commit
