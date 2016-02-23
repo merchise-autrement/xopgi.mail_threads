@@ -25,10 +25,10 @@
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
-                        unicode_literals as _py3_unicode,
                         absolute_import as _py3_abs_import)
 
 
+from xoutil.string import safe_encode
 from xoeuf.osv.orm import get_modelname
 
 from openerp.osv import fields
@@ -83,8 +83,13 @@ class mail_thread(AbstractModel):
         return result
 
 
+SAME_AS_ORIGINAL = None
+PREPEND_X = object()
+
 HEADERS_TO_COPY = {
-    'Content-Disposition': 'X-Original-Content-Disposition',
+    str('Content-Disposition'): SAME_AS_ORIGINAL,
+    str('Content-Type'): SAME_AS_ORIGINAL,
+    str('Content-Id'): SAME_AS_ORIGINAL,
 }
 
 
@@ -172,6 +177,10 @@ def _chopped(msg, charset):
     from email.message import Message
     result = Message()
     for header, target in HEADERS_TO_COPY.items():
+        if target is SAME_AS_ORIGINAL:
+            target = safe_encode(header)
+        elif target is PREPEND_X:
+            target = str('X-{}').format(safe_encode(header))
         result[target] = msg[header]
     result.set_payload('[Removed part]', charset)
     if 'MIME-Version' not in msg:
