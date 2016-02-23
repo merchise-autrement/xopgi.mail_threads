@@ -28,7 +28,9 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 
+from xoutil import Unset
 from xoutil.string import safe_encode
+
 from xoeuf.osv.orm import get_modelname
 
 from openerp.osv import fields
@@ -181,7 +183,9 @@ def _chopped(msg, charset):
             target = safe_encode(header)
         elif target is PREPEND_X:
             target = str('X-{}').format(safe_encode(header))
-        result[target] = msg[header]
+        original = msg.get(header, Unset)
+        if original is not Unset and target:
+            result[target] = original
     result.set_payload('[Removed part]', charset)
     if 'MIME-Version' not in msg:
         del result['MIME-Version']
