@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+  <data>
+
+    <record id="xopgi_mail_message_view" model="ir.ui.view">
+      <field name="name">xopgi.mail_threads.mail.message.form</field>
+      <field name="model">mail.message</field>
+      <field name="inherit_id" ref="mail.view_message_form" />
+      <field name="arch" type="xml">
+        <field name="body" position="after">
+          <separator/>
+          <pre>
+            <field name="raw_email" />
+          </pre>
+        </field>
+      </field>
+    </record>
+
+  </data>
+</openerp>

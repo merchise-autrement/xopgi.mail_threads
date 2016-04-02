@@ -23,6 +23,7 @@ def read_terpfile():
     from os.path import join
     with open(join(os.path.dirname(__file__), '__openerp__.py'), 'rU') as fh:
         content = fh.read()
+        # Don't use the ODOO_VERSION_INFO magic.
         return eval(content, {}, {})
 
 _TERP = read_terpfile()
