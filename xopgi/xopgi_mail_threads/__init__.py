@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads
 # ---------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement
+# Copyright (c) 2014-2016 Merchise Autrement [~º/~]
 # All rights reserved.
 #
 #
