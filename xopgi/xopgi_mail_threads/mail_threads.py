@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads.threads
 # ---------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement and Contributors
+# Copyright (c) 2014-2016 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -32,7 +32,6 @@ Our current solution is two folded:
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
-                        unicode_literals as _py3_unicode,
                         absolute_import as _py3_abs_import)
 
 try:
@@ -40,19 +39,14 @@ try:
 except ImportError:
     from xoutil.objects import metaclass
 
+from xoutil import logger as _logger
 from xoutil.string import safe_encode
 
-from xoeuf.osv.orm import get_modelname
-
 from openerp.osv.orm import AbstractModel
-from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
-
-from xoutil import logger as _logger
 
 
-class mail_thread(AbstractModel):
-    _name = get_modelname(_base_mail_thread)
-    _inherit = _name
+class MailThread(AbstractModel):
+    _inherit = 'mail.thread'
 
     def _customize_routes(self, cr, uid, message, routes, context=None):
         from .utils import is_router_installed
@@ -97,7 +91,7 @@ class mail_thread(AbstractModel):
 
     def message_route(self, cr, uid, rawmessage, message, model=None,
                       thread_id=None, custom_values=None, context=None):
-        _super = super(mail_thread, self).message_route
+        _super = super(MailThread, self).message_route
         result = []
         error = None
         try:
@@ -119,4 +113,4 @@ class mail_thread(AbstractModel):
         else:
             return []
 
-del metaclass, get_modelname, AbstractModel
+del metaclass, AbstractModel

@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # mail_messages
 # ---------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement and Contributors
+# Copyright (c) 2014-2016 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -27,16 +27,11 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-
 from xoutil import Unset
 from xoutil.string import safe_encode
 
-from xoeuf.osv.orm import get_modelname
-
 from openerp.osv import fields
 from openerp.osv.orm import AbstractModel, Model
-from openerp.addons.mail.mail_message import mail_message as _base
-from openerp.addons.mail.mail_thread import mail_thread as _base_mail_thread
 
 from email.generator import Generator
 
@@ -45,9 +40,8 @@ from email.generator import Generator
 RAW_EMAIL_ATTR = 'raw_email'
 
 
-class mail_message(Model):
-    _name = get_modelname(_base)
-    _inherit = _name
+class MailMessage(Model):
+    _inherit = 'mail.message'
 
     _columns = {
         RAW_EMAIL_ATTR:
@@ -63,8 +57,8 @@ class mail_message(Model):
 # Since the mailgate program actually call mail_thread's `message_process`,
 # that, in turn, call `message_parse` this is the place to make the raw_email
 # stuff happen, not the `mail_message` object.
-class mail_thread(AbstractModel):
-    _name = get_modelname(_base_mail_thread)
+class MailThread(AbstractModel):
+    _name = 'mail.thread'
     _inherit = _name
 
     def message_parse(self, cr, uid, message, save_original=False,
@@ -72,7 +66,7 @@ class mail_thread(AbstractModel):
         from email.message import Message
         from xoutil.string import safe_decode
         assert isinstance(message, Message)
-        result = super(mail_thread, self).message_parse(
+        result = super(MailThread, self).message_parse(
             cr, uid, message, save_original=save_original, context=context)
         from io import BytesIO
         buf = BytesIO()

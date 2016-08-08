@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads
 # ---------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement
+# Copyright (c) 2014-2016 Merchise Autrement [~º/~]
 # All rights reserved.
 #
 #
@@ -14,7 +14,6 @@
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
-                        unicode_literals as _py3_unicode,
                         absolute_import as _py3_abs_import)
 
 from . import mail_messages  # noqa

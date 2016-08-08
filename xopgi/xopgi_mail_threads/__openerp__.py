@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2016 Merchise Autrement
+# Copyright (c) 2013-2016 Merchise Autrement [~º/~]
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -10,11 +10,14 @@
 # package.
 #
 # @created: 2013-11-11
+# flake8: noqa
 
 
+# We must not use the ODOO_VERSION_INFO magic provide by Merchise's
+# distribution of Odoo.
 {
     "name": "Mail Threads (xopgi)",
-    "version": "3.0",
+    "version": "4.0",
     "post_load": "post_load_hook",
     "author": "Merchise Autrement",
     "website": "http://xopgi.merchise.org/addons/xopgi_mail_threads",
@@ -22,10 +25,10 @@
     "description": "Improves OpenERP's basic mail management.",
     "depends": ['mail'],
     "data": [
-        "views/mail_message_view.xml",
+        "views/transitional.xml"
     ],
     "demo_xml": [],
     "application": False,
-    "installable": True,
     "auto_install": True,
+    'installable': True,
 }
