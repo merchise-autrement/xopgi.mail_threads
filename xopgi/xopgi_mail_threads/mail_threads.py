@@ -99,10 +99,13 @@ class MailThread(AbstractModel):
                             thread_id=thread_id,
                             custom_values=custom_values,
                             context=context)
-        except ValueError as error:
+        except (AssertionError, ValueError) as error:
             # super's message_route method may raise a ValueError if it finds
             # no route, we want to wait to see if we can find a custom route
             # before raising the ValueError.
+            #
+            # In Odoo 9 super's message_route may raise an AssertionError if
+            # the fallback model (i.e crm.lead) is not installed.
             pass
         result = self._customize_routes(cr, uid, rawmessage, result or [],
                                         context=context)
