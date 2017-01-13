@@ -39,9 +39,11 @@ def post_load_hook():
     # We're choosing the last one.
     #
     try:
-        from openerp.addons.mail import models as mail
+        from odoo.addons.mail import models as mail   # Odoo 10+
     except ImportError:
-        # Odoo 8
-        from openerp.addons import mail
+        try:
+            from openerp.addons.mail import models as mail   # Odoo 9
+        except ImportError:
+            from openerp.addons import mail  # Odoo 8
     assert getattr(mail, 'xopgi', False), \
         'You must use a recent Odoo packaged by Merchise Autrement'

@@ -23,8 +23,11 @@ try:
     # Odoo 8
     from openerp.addons.mail.mail_thread import decode_header
 except ImportError:
-    # Odoo 9 fallback
-    from openerp.addons.mail.models.mail_thread import decode_header
+    try:
+        # Odoo 9 fallback
+        from openerp.addons.mail.models.mail_thread import decode_header
+    except ImportError:
+        from odoo.addons.mail.models.mail_thread import decode_header
 
 from openerp.addons.base.ir.ir_mail_server import \
     encode_rfc2822_address_header as _address_header
