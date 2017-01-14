@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # mail_messages
 # ---------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -30,8 +30,12 @@ from __future__ import (division as _py3_division,
 from xoutil import Unset
 from xoutil.string import safe_encode
 
-from openerp.osv import fields
-from openerp.osv.orm import AbstractModel, Model
+try:
+    from openerp import fields, api
+    from openerp.models import AbstractModel, Model
+except ImportError:
+    from odoo import fields, api
+    from odoo.models import AbstractModel, Model
 
 from email.generator import Generator
 
@@ -43,15 +47,9 @@ RAW_EMAIL_ATTR = 'raw_email'
 class MailMessage(Model):
     _inherit = 'mail.message'
 
-    _columns = {
-        RAW_EMAIL_ATTR:
-            fields.text('Raw Email',
-                        help='The raw email message unprocessed.')
-    }
-
-    _defaults = {
-        RAW_EMAIL_ATTR: ''
-    }
+    raw_email = fields.Text('Raw Email',
+                            default='',
+                            help='The raw email message unprocessed.')
 
 
 # Since the mailgate program actually call mail_thread's `message_process`,
@@ -61,20 +59,21 @@ class MailThread(AbstractModel):
     _name = 'mail.thread'
     _inherit = _name
 
-    def message_parse(self, cr, uid, message, save_original=False,
-                      context=None):
+    @api.model
+    def message_parse(self, message, save_original=False):
         from email.message import Message
         from xoutil.string import safe_decode
         assert isinstance(message, Message)
         result = super(MailThread, self).message_parse(
-            cr, uid, message, save_original=save_original, context=context)
+            message, save_original=save_original
+        )
         from io import BytesIO
         buf = BytesIO()
         # Re-encode to the connection encoding
         gen = ReencodingGenerator(buf, mangle_from_=False,
-                                  target_charset=cr._cnx.encoding)
+                                  target_charset=self._cr._cnx.encoding)
         gen.flatten(message)
-        message = safe_decode(buf.getvalue(), encoding=cr._cnx.encoding)
+        message = safe_decode(buf.getvalue(), encoding=self._cr._cnx.encoding)
         result[RAW_EMAIL_ATTR] = message
         return result
 

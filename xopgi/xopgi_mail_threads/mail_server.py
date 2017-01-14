@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------
 # xopgi.mail_threads.mail_server
 # ---------------------------------------------------------------------
-# Copyright (c) 2015-2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2015-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -29,10 +29,12 @@ from __future__ import (division as _py3_division,
 from xoutil.context import context as execution_context
 from xoutil import logger as _logger
 
-from openerp.osv.orm import Model
-
-
-neither = lambda *args: all(not a for a in args)
+try:
+    from openerp.models import Model
+    from openerp import api
+except ImportError:
+    from odoo.models import Model
+    from odoo import api
 
 
 def get_kwargs(func):
@@ -50,7 +52,8 @@ def get_kwargs(func):
 class MailServer(Model):
     _inherit = 'ir.mail_server'
 
-    def send_email(self, cr, uid, message, **kw):
+    @api.model
+    def send_email(self, message, **kw):
         '''Sends an email.
 
         Overrides the basic OpenERP's sending to allow transports to kick in.
@@ -75,22 +78,18 @@ class MailServer(Model):
                 from .transports import MailTransportRouter as transports
                 mail_server_id = kw.get('mail_server_id', None)
                 smtp_server = kw.get('smtp_server', None)
-                context = kw.pop('context', {})
+                context = self._context
                 if neither(mail_server_id, smtp_server):
                     transport, querydata = transports.select(
-                        self, cr, uid, message, context=context
+                        self, message
                     )
                     if transport:
                         with transport:
                             message, conndata = transport.prepare_message(
-                                self, cr, uid, message,
+                                self, message,
                                 data=querydata,
-                                context=context
                             )
-                            return transport.deliver(
-                                self, cr, uid, message, conndata,
-                                context=context
-                            )
+                            return transport.deliver(self,message, conndata)
             except Exception as e:
                 from openerp.addons.base.ir.ir_mail_server import \
                     MailDeliveryException
@@ -105,12 +104,14 @@ class MailServer(Model):
                     )
                 else:
                     raise
-        return _super(cr, uid, message, **kw)
+        return _super(message, **kw)
 
-    def send_without_transports(self, cr, uid, message, **kw):
+    @api.model
+    def send_without_transports(self, message, **kw):
         '''Send a message without using third-party transports.'''
         with execution_context(DIRECT_SEND_CONTEXT):
-            self.send_email(cr, uid, message, **kw)
+            self.send_email(message, **kw)
 
 
 DIRECT_SEND_CONTEXT = object()
+neither = lambda *args: all(not a for a in args)

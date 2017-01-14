@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads
 # ---------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement [~º/~]
+# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 #
@@ -38,6 +38,12 @@ def post_load_hook():
     #
     # We're choosing the last one.
     #
-    from openerp.addons import mail
+    try:
+        from odoo.addons.mail import models as mail   # Odoo 10+
+    except ImportError:
+        try:
+            from openerp.addons.mail import models as mail   # Odoo 9
+        except ImportError:
+            from openerp.addons import mail  # Odoo 8
     assert getattr(mail, 'xopgi', False), \
         'You must use a recent Odoo packaged by Merchise Autrement'

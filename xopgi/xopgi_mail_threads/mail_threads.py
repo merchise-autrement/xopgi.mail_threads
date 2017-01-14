@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi.xopgi_mail_threads.threads
 # ---------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -42,13 +42,19 @@ except ImportError:
 from xoutil import logger as _logger
 from xoutil.string import safe_encode
 
-from openerp.osv.orm import AbstractModel
+try:
+    from openerp import api
+    from openerp.models import AbstractModel
+except ImportError:
+    from odoo import api
+    from odoo.models import AbstractModel
 
 
 class MailThread(AbstractModel):
     _inherit = 'mail.thread'
 
-    def _customize_routes(self, cr, uid, message, routes, context=None):
+    @api.model
+    def _customize_routes(self, message, routes):
         from .utils import is_router_installed
         from .routers import MailRouter
         for router in MailRouter.registry:
@@ -56,16 +62,14 @@ class MailThread(AbstractModel):
             # keep it safe here to restore if needed.
             routes_copy = routes[:]
             try:
-                if is_router_installed(cr, uid, router):
-                    result = router.query(self, cr, uid, message,
-                                          context=context)
+                if is_router_installed(self._cr, self._uid, router):
+                    result = router.query(self, message)
                     if isinstance(result, tuple):
                         valid, data = result
                     else:
                         valid, data = result, None
                     if valid:
-                        router.apply(self, cr, uid, routes, message,
-                                     data=data, context=context)
+                        router.apply(self, routes, message, data=data)
             except:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
@@ -89,23 +93,22 @@ class MailThread(AbstractModel):
             )
         return routes
 
-    def message_route(self, cr, uid, rawmessage, message, model=None,
-                      thread_id=None, custom_values=None, context=None):
+    @api.model
+    def message_route(self, rawmessage, message, **kwargs):
         _super = super(MailThread, self).message_route
         result = []
         error = None
         try:
-            result = _super(cr, uid, rawmessage, message, model=model,
-                            thread_id=thread_id,
-                            custom_values=custom_values,
-                            context=context)
-        except ValueError as error:
+            result = _super(rawmessage, message, **kwargs)
+        except (AssertionError, ValueError) as error:
             # super's message_route method may raise a ValueError if it finds
             # no route, we want to wait to see if we can find a custom route
             # before raising the ValueError.
+            #
+            # In Odoo 9 super's message_route may raise an AssertionError if
+            # the fallback model (i.e crm.lead) is not installed.
             pass
-        result = self._customize_routes(cr, uid, rawmessage, result or [],
-                                        context=context)
+        result = self._customize_routes(rawmessage, result or [])
         if result:
             return result
         elif error:
