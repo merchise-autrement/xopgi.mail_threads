@@ -132,7 +132,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         '''
         raise NotImplemented()
 
-    def deliver(self, server, cr, uid, message, data, context=None):
+    def deliver(self, server, message, data):
         '''Deliver if possible the message.
 
         Return False if the transport won't do the delivery directly.  This
@@ -156,8 +156,8 @@ class MailTransportRouter(metaclass(RegisteredType)):
         not defined.
 
         '''
-        kwargs = dict(data or {}, context=context)
-        return server.send_email(cr, uid, message, **kwargs)
+        kwargs = dict(data or {})
+        return server.send_email(message, **kwargs)
 
     def prepare_message(self, obj, cr, uid, message, data=None, context=None):
         '''Prepares the message to be delivered.

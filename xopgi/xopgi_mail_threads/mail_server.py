@@ -81,8 +81,7 @@ class MailServer(Model):
                 context = self._context
                 if neither(mail_server_id, smtp_server):
                     transport, querydata = transports.select(
-                        self.pool[self._name],
-                        self._cr, self._uid, message, context=context
+                        self, message
                     )
                     if transport:
                         with transport:
