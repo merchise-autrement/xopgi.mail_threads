@@ -191,21 +191,20 @@ class MailTransportRouter(metaclass(RegisteredType)):
         of references is not found it won't be included the `refs` list.
 
         '''
-        from xoeuf.osv.model_extensions import search_browse
         message_id = message['Message-Id']
         references = tuple(
             ref.strip()
             for ref in message.get('References', '').split(',')
         )
-        mail_messages = obj.pool['mail.message']
-        query = [('message_id', '=', message_id)]
-        msg = search_browse(mail_messages, cr, uid, query, context=context)
+        Messages = obj.browse(cr, uid, context=context).env['mail.message']
+        msg = Messages.search([('message_id', '=', message_id)])
         if not msg:
             msg = None  # convert the null-record to None
         if references:
-            query = [('message_id', 'in', references)]
-            refs = search_browse(mail_messages, cr, uid, query,
-                                 context=context, ensure_list=True)
+            refs = Messages.search([('message_id', 'in', references)])
+        else:
+            refs = []
         return msg, refs
+
 
 del metaclass, classproperty, RegisteredType, namedtuple
