@@ -63,21 +63,13 @@ class MailThread(AbstractModel):
             routes_copy = routes[:]
             try:
                 if is_router_installed(self._cr, self._uid, router):
-                    result = router.query(
-                        self.pool[self._name],
-                        self._cr, self._uid, message,
-                        context=self._context
-                    )
+                    result = router.query(self, message)
                     if isinstance(result, tuple):
                         valid, data = result
                     else:
                         valid, data = result, None
                     if valid:
-                        router.apply(
-                            self.pool[self._name],
-                            self._cr, self._uid, routes,
-                            message, data=data, context=self._context
-                        )
+                        router.apply(self, routes, message, data=data)
             except:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy

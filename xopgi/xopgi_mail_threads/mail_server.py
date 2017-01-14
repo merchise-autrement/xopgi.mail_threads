@@ -86,16 +86,10 @@ class MailServer(Model):
                     if transport:
                         with transport:
                             message, conndata = transport.prepare_message(
-                                self.pool[self._name],
-                                self._cr, self._uid, message,
+                                self, message,
                                 data=querydata,
-                                context=context
                             )
-                            return transport.deliver(
-                                self.pool[self._name],
-                                self._cr, self._uid, message, conndata,
-                                context=context
-                            )
+                            return transport.deliver(self,message, conndata)
             except Exception as e:
                 from openerp.addons.base.ir.ir_mail_server import \
                     MailDeliveryException
