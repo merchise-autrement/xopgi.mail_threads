@@ -12,9 +12,6 @@
 # @created: 2013-11-11
 # flake8: noqa
 
-
-# We must not use the ODOO_VERSION_INFO magic provide by Merchise's
-# distribution of Odoo.
 {
     "name": "Mail Threads (xopgi)",
     "version": "4.0",
@@ -33,5 +30,5 @@
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': ((8, 0) <= ODOO_VERSION_INFO < (10, 0))
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (11, 0)
 }

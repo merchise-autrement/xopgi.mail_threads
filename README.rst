@@ -32,6 +32,17 @@ directory.
 This addons does not use features not in the core OpenERP_.
 
 
+Odoo versions supported
+=======================
+
+This package has been thoroughly used in Odoo 8.  At this point, we're
+starting to use it in Odoo 10.  It should work in Odoo 9, but we haven't
+tested it.
+
+.. warning:: Odoo versions supported are those patched by
+   Merchise Autrement [~°/~].
+
+
 Usage
 =====
 
