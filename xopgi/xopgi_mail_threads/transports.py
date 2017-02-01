@@ -59,7 +59,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         return res
 
     @classmethod
-    def select(cls, obj, cr, uid, message, context=None):
+    def select(cls, obj, message):
         '''Select a registered transport that can deliver the message.
 
         No order is warranted about how to select any transport that can
@@ -73,13 +73,13 @@ class MailTransportRouter(metaclass(RegisteredType)):
         from .utils import is_router_installed
         from xoutil.context import Context
         candidates = (transport for transport in MailTransportRouter.registry
-                      if is_router_installed(cr, uid, transport)
+                      if is_router_installed(obj, transport)
                       if transport.context_name not in Context)
         found, transport, data = False, None, None
         candidate = next(candidates, None)
         while not found and candidate:
             try:
-                res = candidate.query(obj, cr, uid, message, context=context)
+                res = candidate.query(obj, message)
             except:
                 _logger.exception(
                     'Candidate transport %s failed. Proceeding with another',

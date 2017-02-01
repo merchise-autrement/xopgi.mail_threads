@@ -62,7 +62,7 @@ class MailThread(AbstractModel):
             # keep it safe here to restore if needed.
             routes_copy = routes[:]
             try:
-                if is_router_installed(self._cr, self._uid, router):
+                if is_router_installed(self, router):
                     result = router.query(self, message)
                     if isinstance(result, tuple):
                         valid, data = result
