@@ -42,14 +42,8 @@ class RegisteredType(type):
     '''A metaclass that registers all its instances.'''
 
     def __new__(cls, name, bases, attrs):
-        import types
-        for name, val in attrs.items():
-            if isinstance(val, types.FunctionType):
-                attrs[name] = routermethod(val)
-            elif isinstance(val, classmethod):
-                attrs[name] = classmethod(routermethod(val.__func__))
         res = super(RegisteredType, cls).__new__(cls, name, bases, attrs)
-        root = res.mro()[-2]
+        root = res.mro()[-2]  # up two levels in the MRO must be the base
         registry = getattr(root, 'registry', None)
         if registry is not None:
             registry.add(res)
@@ -120,60 +114,3 @@ def set_message_from(message, addresses, address_only=False):
     '''
     set_message_address_header(message, 'From', addresses,
                                address_only=address_only)
-
-
-def routermethod(f):
-    '''Allows a router-method to be defined using either API style and be
-    called in any style.
-
-    A function with a signature like ``(cls, obj, cr, uid, ...,
-    context=None)`` will be considered implemented in the deprecated API style
-    and will be "upgraded".
-
-    .. warning:: For the sake of simplicity we only test for ``(cls, obj, cr,
-       ...)`` but assume all the other arguments.
-
-    A function with a signature like ``(cls, obj, ...)`` with no other
-    arguments or with a third argument but ``cr``, will be considered
-    implemented in the new API style and be "downgraded".
-
-    A function with any other signature, will be returned unchanged.
-
-    `self` is also valid for the first argument, and `server` for the second.
-    All other argument names must match with the documentation above.
-
-    '''
-    from xoutil.functools import wraps
-    from xoutil.inspect import getfullargspec
-    args = getfullargspec(f).args
-    if len(args) <= 2:
-        # We need at least (self, object, ...)
-        return f
-    if args[0] not in ('cls', 'self'):
-        return f
-    if args[1] not in ('obj', 'server'):
-        return f
-    args = args[2:]
-    if args and args[0] == 'cr':
-        @wraps(f)
-        def f_upgraded(self, obj, *args, **kw):
-            if hasattr(obj, 'env'):
-                cr, uid, context = obj._cr, obj._uid, obj._context
-                obj = obj.pool[obj._name]
-                # context is explicitly passed as keyword to catch methods
-                # that double pass it.
-                return f(self, obj, cr, uid, context=context, *args, **kw)
-            else:
-                return f(self, obj, *args, **kw)
-        return f_upgraded
-    else:
-        @wraps(f)
-        def f_downgrade(self, obj, *args, **kw):
-            if hasattr(obj, 'env'):
-                return f(self, obj, *args, **kw)
-            else:
-                (cr, uid), args = args[:2], args[2:]
-                context = kw.pop('context', None)
-                obj = obj.browse(cr, uid, context=context)
-                return f(self, obj, *args, **kw)
-        return f_downgrade

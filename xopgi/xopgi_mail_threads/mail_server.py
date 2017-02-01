@@ -78,7 +78,6 @@ class MailServer(Model):
                 from .transports import MailTransportRouter as transports
                 mail_server_id = kw.get('mail_server_id', None)
                 smtp_server = kw.get('smtp_server', None)
-                context = self._context
                 if neither(mail_server_id, smtp_server):
                     transport, querydata = transports.select(
                         self, message

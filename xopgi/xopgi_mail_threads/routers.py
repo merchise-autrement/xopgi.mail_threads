@@ -55,7 +55,7 @@ class MailRouter(metaclass(RegisteredType)):
     '''
 
     @classmethod
-    def query(cls, obj, cr, uid, message, context=None):
+    def query(cls, obj, message):
         '''Return if the router is applicable to the message.
 
         This is defined as weak test, but strong tests are encouraged.
@@ -82,14 +82,14 @@ class MailRouter(metaclass(RegisteredType)):
         .. versionchanged:: 3.0 Changed the name to the method to `query` so
            that is more consistent with `MailTransportRouter`:class:
 
-        .. versionchanged::
+        .. versionchanged:: 4.0 No more old API signature.
 
         '''
         if cls is MailRouter:  # avoid failing when super()
             raise NotImplementedError()
 
     @classmethod
-    def apply(cls, obj, cr, uid, routes, message, data=None, context=None):
+    def apply(cls, obj, routes, message, data=None):
         '''Transform if needed the `routes` according to the message.
 
         :param routes: The routes as previously left by OpenERP and possible
@@ -99,6 +99,8 @@ class MailRouter(metaclass(RegisteredType)):
         Each route must have the form::
 
            (model, thread_id, custom_values, user_id, alias_id)
+
+        .. versionchanged:: 4.0 No more old API signature.
 
         '''
         if cls is MailRouter:

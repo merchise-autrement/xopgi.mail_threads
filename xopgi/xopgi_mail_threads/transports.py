@@ -115,7 +115,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         return self.context.__exit__(*args)
 
     @classmethod
-    def query(cls, obj, cr, uid, message, context=None):
+    def query(cls, obj, message):
         '''Respond if the transport router can deliver the message.
 
         Return True if the transport can deliver the message and False,
@@ -128,6 +128,8 @@ class MailTransportRouter(metaclass(RegisteredType)):
 
         This is useful to avoid computing things twice in `query` and in
         `prepare_message`:meth:.
+
+        .. versionchanged:: 4.0 No more old API signature.
 
         '''
         raise NotImplemented()
@@ -159,7 +161,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         kwargs = dict(data or {})
         return server.send_email(message, **kwargs)
 
-    def prepare_message(self, obj, cr, uid, message, data=None, context=None):
+    def prepare_message(self, obj, message, data=None):
         '''Prepares the message to be delivered.
 
         Returns a named tuple TransportRouteData with ``(message,
@@ -180,7 +182,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         return TransportRouteData(message, {})
 
     @classmethod
-    def get_message_objects(cls, obj, cr, uid, message, context=None):
+    def get_message_objects(cls, obj, message):
         '''Get the mail.message browse record for the `message` .
 
         :returns: A tuple ``(msg, refs)`` where the `msg` is the mail.message
@@ -196,7 +198,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
             ref.strip()
             for ref in message.get('References', '').split(',')
         )
-        Messages = obj.browse(cr, uid, context=context).env['mail.message']
+        Messages = obj.env['mail.message']
         msg = Messages.search([('message_id', '=', message_id)])
         if not msg:
             msg = None  # convert the null-record to None
