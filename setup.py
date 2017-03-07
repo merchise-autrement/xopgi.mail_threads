@@ -52,7 +52,7 @@ setup(name=project_name,
       zip_safe=False,
       install_requires=[
           'xoeuf',
-          'xoutil>=1.6.8-dev',
+          'xoutil>=1.7.1post2,<1.8',
       ],
       entry_points="""
       [xoeuf.addons]
