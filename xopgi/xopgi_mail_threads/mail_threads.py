@@ -55,21 +55,19 @@ class MailThread(AbstractModel):
 
     @api.model
     def _customize_routes(self, message, routes):
-        from .utils import is_router_installed
         from .routers import MailRouter
-        for router in MailRouter.registry:
+        for router in MailRouter.get_installed_objects(self):
             # Since a router may fail after modifying `routes` somehow, let's
             # keep it safe here to restore if needed.
             routes_copy = routes[:]
             try:
-                if is_router_installed(self, router):
-                    result = router.query(self, message)
-                    if isinstance(result, tuple):
-                        valid, data = result
-                    else:
-                        valid, data = result, None
-                    if valid:
-                        router.apply(self, routes, message, data=data)
+                result = router.query(self, message)
+                if isinstance(result, tuple):
+                    valid, data = result
+                else:
+                    valid, data = result, None
+                if valid:
+                    router.apply(self, routes, message, data=data)
             except:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
@@ -94,12 +92,15 @@ class MailThread(AbstractModel):
         return routes
 
     @api.model
-    def message_route(self, rawmessage, message, **kwargs):
-        _super = super(MailThread, self).message_route
+    def message_route(self, message, message_dict, model=None, thread_id=None,
+                      custom_values=None):
         result = []
         error = None
         try:
-            result = _super(rawmessage, message, **kwargs)
+            _super = super(MailThread, self).message_route
+            result = _super(message, message_dict, model=model,
+                            thread_id=thread_id,
+                            custom_values=custom_values)
         except (AssertionError, ValueError) as error:
             # super's message_route method may raise a ValueError if it finds
             # no route, we want to wait to see if we can find a custom route
@@ -108,7 +109,7 @@ class MailThread(AbstractModel):
             # In Odoo 9 super's message_route may raise an AssertionError if
             # the fallback model (i.e crm.lead) is not installed.
             pass
-        result = self._customize_routes(rawmessage, result or [])
+        result = self._customize_routes(message, result or [])
         if result:
             return result
         elif error:
