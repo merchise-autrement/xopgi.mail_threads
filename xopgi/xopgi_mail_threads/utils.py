@@ -30,6 +30,18 @@ except ImportError:
         # Odoo 9 fallback
         from openerp.addons.mail.models.mail_thread import decode_header
 
+
+try:
+    from odoo.tools.mail import decode_smtp_header
+except ImportError:
+    try:
+        from openerp.addons.mail.mail_message \
+            import decode as decode_smtp_header
+    except ImportError:
+        from openerp.addons.mail.models.mail_message \
+            import decode as decode_smtp_header
+
+
 try:
     from odoo.addons.base.ir.ir_mail_server import \
         encode_rfc2822_address_header as _address_header
