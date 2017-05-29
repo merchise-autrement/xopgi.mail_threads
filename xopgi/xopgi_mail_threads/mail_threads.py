@@ -55,21 +55,19 @@ class MailThread(AbstractModel):
 
     @api.model
     def _customize_routes(self, message, routes):
-        from .utils import is_router_installed
         from .routers import MailRouter
-        for router in MailRouter.registry:
+        for router in MailRouter.get_installed_objects(self):
             # Since a router may fail after modifying `routes` somehow, let's
             # keep it safe here to restore if needed.
             routes_copy = routes[:]
             try:
-                if is_router_installed(self, router):
-                    result = router.query(self, message)
-                    if isinstance(result, tuple):
-                        valid, data = result
-                    else:
-                        valid, data = result, None
-                    if valid:
-                        router.apply(self, routes, message, data=data)
+                result = router.query(self, message)
+                if isinstance(result, tuple):
+                    valid, data = result
+                else:
+                    valid, data = result, None
+                if valid:
+                    router.apply(self, routes, message, data=data)
             except:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
