@@ -20,6 +20,11 @@ from __future__ import (division as _py3_division,
 from email.utils import getaddresses, formataddr
 
 try:
+    from odoo.release import version_info as ODOO_VERSION_INFO
+except ImportError:
+    from openerp.release import version_info as ODOO_VERSION_INFO
+
+try:
     # Odoo 10
     from odoo.tools.mail import decode_message_header as decode_header
 except ImportError:
@@ -30,7 +35,6 @@ except ImportError:
         # Odoo 9 fallback
         from openerp.addons.mail.models.mail_thread import decode_header
 
-
 try:
     from odoo.tools.mail import decode_smtp_header
 except ImportError:
@@ -40,7 +44,6 @@ except ImportError:
     except ImportError:
         from openerp.addons.mail.models.mail_message \
             import decode as decode_smtp_header
-
 
 try:
     from odoo.addons.base.ir.ir_mail_server import \
@@ -192,7 +195,11 @@ def routermethod(f):
     `self` is also valid for the first argument, and `server` for the second.
     All other argument names must match with the documentation above.
 
+    When in Odoo 10 (which does not support the old API) it's an error for `f`
+    to use the old API.
+
     '''
+    from xoutil.names import simple_name as name
     from xoutil.functools import wraps
     from xoutil.inspect import getfullargspec
     args = getfullargspec(f).args
@@ -205,6 +212,9 @@ def routermethod(f):
         return f
     args = args[2:]
     if args and args[0] == 'cr':
+        assert ODOO_VERSION_INFO < (10, 0), \
+            "Method '%s' is written using the removed old API" % name(f)
+
         @wraps(f)
         def f_upgraded(self, obj, *args, **kw):
             if hasattr(obj, 'env'):
@@ -222,6 +232,7 @@ def routermethod(f):
             if hasattr(obj, 'env'):
                 return f(self, obj, *args, **kw)
             else:
+                assert ODOO_VERSION_INFO < (10, 0)
                 (cr, uid), args = args[:2], args[2:]
                 context = kw.pop('context', None)
                 obj = obj.browse(cr, uid, context=context)
