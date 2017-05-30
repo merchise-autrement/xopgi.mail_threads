@@ -88,7 +88,9 @@ class MailServer(Model):
                                 self, message,
                                 data=querydata,
                             )
-                            return transport.deliver(self,message, conndata)
+                            return transport.deliver(
+                                self, message, conndata, **kw
+                            )
             except Exception as e:
                 from openerp.addons.base.ir.ir_mail_server import \
                     MailDeliveryException

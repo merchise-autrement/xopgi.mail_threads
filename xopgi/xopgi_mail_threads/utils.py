@@ -20,6 +20,11 @@ from __future__ import (division as _py3_division,
 from email.utils import getaddresses, formataddr
 
 try:
+    from odoo.release import version_info as ODOO_VERSION_INFO
+except ImportError:
+    from openerp.release import version_info as ODOO_VERSION_INFO
+
+try:
     # Odoo 10
     from odoo.tools.mail import decode_message_header as decode_header
 except ImportError:
@@ -31,6 +36,16 @@ except ImportError:
         from openerp.addons.mail.models.mail_thread import decode_header
 
 try:
+    from odoo.tools.mail import decode_smtp_header
+except ImportError:
+    try:
+        from openerp.addons.mail.mail_message \
+            import decode as decode_smtp_header
+    except ImportError:
+        from openerp.addons.mail.models.mail_message \
+            import decode as decode_smtp_header
+
+try:
     from odoo.addons.base.ir.ir_mail_server import \
         encode_rfc2822_address_header as _address_header
 except ImportError:
@@ -39,7 +54,29 @@ except ImportError:
 
 
 class RegisteredType(type):
-    '''A metaclass that registers all its instances.'''
+    '''A metaclass that registers all its instances.
+
+    Create a new instance of a registered type (take note of the Python 2/3
+    difference for metaclasses)::
+
+        >>> class Foo(object):
+        ...   __metaclass__ = RegisteredType
+
+
+    The subclassess of ``Foo`` will be registered::
+
+        >>> class Bar(Foo):
+        ...    pass
+
+        >>> Bar in Foo.registry
+        True
+
+    The method `get_installed_objects`:meth: requires model (new API
+    recordset).  Return a subset of the registered subclasses that are defined
+    in module that belongs to an addon which is installed in the DB related
+    with the given model.
+
+    '''
 
     def __new__(cls, name, bases, attrs):
         res = super(RegisteredType, cls).__new__(cls, name, bases, attrs)
@@ -51,16 +88,32 @@ class RegisteredType(type):
             root.registry = set()
         return res
 
+    def get_installed_objects(self, model):
+        '''Return a list of all registered objects which are installed in the
+        DB given by `model`.
 
-def is_router_installed(obj, router):
-    from xoeuf.modules import get_object_module
-    module = get_object_module(router)
-    if module:
-        mm = obj.env['ir.module.module']
-        query = [('state', '=', 'installed'), ('name', '=', module)]
-        return bool(mm.search(query))
-    else:
-        return False
+        Return a iterable (not necessarily a list).
+
+        '''
+        return (
+            obj
+            for obj in self.registry
+            if is_object_installed(model, obj)
+        )
+
+
+try:
+    from xoeuf.models import is_object_installed
+except ImportError:
+    def is_object_installed(self, object):
+        from xoeuf.modules import get_object_module
+        module = get_object_module(object)
+        if module:
+            mm = self.env['ir.module.module']
+            query = [('state', '=', 'installed'), ('name', '=', module)]
+            return bool(mm.search(query))
+        else:
+            return False
 
 
 # TODO: Move these to xoutil.  For that I need first to port the
