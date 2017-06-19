@@ -18,20 +18,6 @@ given message based on some conditions.  Another application can be to use
 LMTP instead of SMTP, or some other sort of bridge.
 
 
-Note about installation
-=======================
-
-We are using buildout_ to deploy our of OpenERP servers.  We also developed a
-framework-level package for `OpenERP/Odoo`_ called xoeuf_.  xoeuf allows you
-to install addons like true Python distributions instead of just copying them
-to a directory.
-
-Nevertheless you may just copy ``xopgi_mail_threads`` to your addons
-directory.
-
-This addons does not use features not in the core OpenERP_.
-
-
 Odoo versions supported
 =======================
 
@@ -39,8 +25,10 @@ This package has been thoroughly used in Odoo 8.  At this point, we're
 starting to use it in Odoo 10.  It should work in Odoo 9, but we haven't
 tested it.
 
-.. warning:: Odoo versions supported are those patched by
+.. warning:: Odoo versions supported are those patched__ by
    Merchise Autrement [~°/~].
+
+__ https://github.com/merchise-autrement/odoo
 
 
 Usage
