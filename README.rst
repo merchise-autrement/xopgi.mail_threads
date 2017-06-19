@@ -49,7 +49,7 @@ Mail routers are implemented with Python new-style classes that inherit from
 
 They must implement following methods:
 
-- ``query(cls, obj, cr, uid, message, context=None)``
+- ``query(cls, obj, message)``
 
   A *class method* to test whether a message should be routed using this
   router.  It must return either:
@@ -61,11 +61,11 @@ They must implement following methods:
     value as before and the second component is an opaque object that is
     passed to the `apply` method as the `data` keyword argument.
 
-  The `obj` argument will be the ``mail.thread`` object from the DB registry.
-  `message` is the parsed message being received (i.e an instance of
-  `email.message.Message`:class:).
+  The `obj` argument will be the ``mail.thread()`` empty record-set from the
+  DB registry.  `message` is the parsed message being received (i.e an
+  instance of `email.message.Message`:class:).
 
-- ``apply(cls, obj, cr, uid, routes, message, data=None, context=None):``
+- ``apply(cls, obj, routes, message, data=None):``
 
   A *class method* that will be called only if `query` returned True or
   ``(True, ...)``.
@@ -87,7 +87,7 @@ Mail transports are implemented with Python new-style classes that inherit
 from ``MailTransportRouter``.  Transports must implement the following
 methods:
 
-``query(obj, cr, uid, message, context=None)``
+``query(cls, obj, message)``
 
    This is a classmethod.
 
@@ -103,7 +103,7 @@ methods:
    object that is passed as the keyword argument `data` of `prepare_message`.
 
 
-``prepare_message(obj, cr, uid, message, data=None, context=None)``
+``prepare_message(self, obj, message, data=None)``
 
    This is called for the *selected* transport that will deliver the message.
 
@@ -117,15 +117,15 @@ methods:
    `query`.
 
 
-``deliver(obj, cr, uid, message, data, context=None)``
+``deliver(self, obj, message, data)``
 
    Deliver the message if possible.
 
    Return False to indicate the message was not sent.
 
-   .. note:: Before 3.0 False would indicate to fallback to OpenERP's default.
-      This is no longer true.  We will only fallback if the transport fails
-      with an exception other than ``MailDeliveryException``.
+   .. note:: Before 3.0 ``False`` would indicate to fallback to OpenERP's
+      default.  This is no longer true.  We will only fallback if the
+      transport fails with an exception other than ``MailDeliveryException``.
 
    Inside this method you may call the ``send_email`` method of the
    ``ir.mail_server`` object and the current transport won't be re-elected but
@@ -142,8 +142,8 @@ methods:
 Changes in 4.0
 ==============
 
-Add support for Odoo 9.  This came with a minor UI change when showing the raw
-email data in the message view.
+Add support for Odoo 10.  This came with a minor UI change when showing the
+raw email data in the message view.
 
 
 Changes in 3.0
