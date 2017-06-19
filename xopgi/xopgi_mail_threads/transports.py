@@ -25,7 +25,10 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoutil.collections import namedtuple
+try:
+    from xoutil.future.collections import namedtuple
+except ImportError:
+    from xoutil.collections import namedtuple
 try:
     from xoutil.eight.meta import metaclass
 except ImportError:
@@ -129,6 +132,8 @@ class MailTransportRouter(metaclass(RegisteredType)):
 
         This is useful to avoid computing things twice in `query` and in
         `prepare_message`:meth:.
+
+        .. versionchanged:: 4.0 No more old API signature.
 
         '''
         raise NotImplemented()

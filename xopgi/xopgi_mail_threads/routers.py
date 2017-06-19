@@ -82,7 +82,7 @@ class MailRouter(metaclass(RegisteredType)):
         .. versionchanged:: 3.0 Changed the name to the method to `query` so
            that is more consistent with `MailTransportRouter`:class:
 
-        .. versionchanged::
+        .. versionchanged:: 4.0 No more old API signature.
 
         '''
         if cls is MailRouter:  # avoid failing when super()
@@ -99,6 +99,8 @@ class MailRouter(metaclass(RegisteredType)):
         Each route must have the form::
 
            (model, thread_id, custom_values, user_id, alias_id)
+
+        .. versionchanged:: 4.0 No more old API signature.
 
         '''
         if cls is MailRouter:
