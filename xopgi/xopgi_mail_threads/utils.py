@@ -47,8 +47,8 @@ except ImportError:
         from openerp.addons.mail.mail_message \
             import decode as decode_smtp_header
     except ImportError:
-        from openerp.addons.mail.models.mail_message \  # noqa
-            import decode as decode_smtp_header         # noqa
+        from openerp.addons.mail.models.mail_message \
+            import decode as decode_smtp_header
 
 try:
     from odoo.addons.base.ir.ir_mail_server \
