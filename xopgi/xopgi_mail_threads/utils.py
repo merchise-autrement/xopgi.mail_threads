@@ -36,21 +36,26 @@ except ImportError:
         from openerp.addons.mail.models.mail_thread import decode_header
 
 try:
+    from odoo.addons.base.ir.ir_mail_server import encode_header
+except ImportError:
+    from openerp.addons.base.ir.ir_mail_server import encode_header
+
+try:
     from odoo.tools.mail import decode_smtp_header
 except ImportError:
     try:
         from openerp.addons.mail.mail_message \
             import decode as decode_smtp_header
     except ImportError:
-        from openerp.addons.mail.models.mail_message \
-            import decode as decode_smtp_header
+        from openerp.addons.mail.models.mail_message \  # noqa
+            import decode as decode_smtp_header         # noqa
 
 try:
-    from odoo.addons.base.ir.ir_mail_server import \
-        encode_rfc2822_address_header as _address_header
+    from odoo.addons.base.ir.ir_mail_server \
+        import encode_rfc2822_address_header
 except ImportError:
-    from openerp.addons.base.ir.ir_mail_server import \
-        encode_rfc2822_address_header as _address_header
+    from openerp.addons.base.ir.ir_mail_server \
+        import encode_rfc2822_address_header
 
 
 class RegisteredType(type):
@@ -134,7 +139,7 @@ def set_message_address_header(message, header, value, address_only=False):
         )
     else:
         addresses = replacements
-    value = _address_header(
+    value = encode_rfc2822_address_header(
         ', '.join(formataddr(address) for address in addresses)
     )
     if header in message:
