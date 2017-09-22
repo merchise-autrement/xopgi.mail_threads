@@ -117,4 +117,5 @@ class MailThread(AbstractModel):
         else:
             return []
 
+
 del metaclass, AbstractModel
