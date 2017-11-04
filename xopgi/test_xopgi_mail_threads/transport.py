@@ -17,10 +17,10 @@ from xoeuf.odoo.addons.xopgi_mail_threads import MailTransportRouter
 class TestTransport(MailTransportRouter):
     @classmethod
     def query(cls, obj, message):
-        return bool(message['X-Passing']), message['X-Passing-Payload']
+        raise NotImplementedError  # You should mock me!
 
     def prepare_message(self, obj, message, data=None):
-        super(TestTransport, self).prepare_message(obj, message, data=data)
+        return super(TestTransport, self).prepare_message(obj, message, data=data)
 
     def deliver(self, obj, message, data, **kwargs):
-        super(TestTransport, self).deliver(obj, message, data, **kwargs)
+        return super(TestTransport, self).deliver(obj, message, data, **kwargs)

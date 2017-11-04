@@ -14,13 +14,6 @@ from __future__ import (division as _py3_division,
 from xoeuf import models
 
 
-class TestModel(models.Model):
-    _name = 'test.xopgi.thread.model'
-    _inherit = ['mail.thread']
-    _inherits = {'mail.alias': 'alias_id'}
-
-
-# Just to have a default model in 'message_process'.
 class Bouncer(models.Model):
     _name = 'bouncer'
     _inherit = ['mail.thread']
