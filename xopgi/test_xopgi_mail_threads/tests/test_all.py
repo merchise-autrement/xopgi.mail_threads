@@ -31,14 +31,8 @@ This is a message.
 
 '''
 
-TRUISH_ROUTER_QUERY = create_autospec(
-    TestRouter.query,
-    return_value=(True, None),
-)
-FALSY_ROUTER_QUERY = create_autospec(
-    TestRouter.query,
-    return_value=(False, None),
-)
+YES = (True, None)
+NO = (False, None)
 
 
 class RouterCase(TransactionCase):
@@ -47,9 +41,10 @@ class RouterCase(TransactionCase):
     at_install = not post_install
 
 
-@patch.multiple(TestRouter, query=FALSY_ROUTER_QUERY, apply=DEFAULT)
+@patch.object(TestRouter, 'query', return_value=NO)
+@patch.object(TestRouter, 'apply')
 class TestReceivingMailsFalsyQuery(RouterCase):
-    def test_calls_router_query(self, query, apply):
+    def test_calls_router_query(self, apply, query):
         Mailer = self.env['mail.thread']
         Mailer.message_process(
             'bouncer',
@@ -61,9 +56,10 @@ class TestReceivingMailsFalsyQuery(RouterCase):
         self.assertFalse(apply.called)
 
 
-@patch.multiple(TestRouter, query=TRUISH_ROUTER_QUERY, apply=DEFAULT)
+@patch.object(TestRouter, 'query', return_value=YES)
+@patch.object(TestRouter, 'apply')
 class TestReceivingMailsTruishQuery(RouterCase):
-    def test_calls_router_apply(self, query, apply):
+    def test_calls_router_apply(self, apply, query):
         Mailer = self.env['mail.thread']
         Mailer.message_process(
             'bouncer',
@@ -75,22 +71,9 @@ class TestReceivingMailsTruishQuery(RouterCase):
         self.assertTrue(apply.called)
 
 
-TRUISH_TRANSP_QUERY = create_autospec(
-    TestTransport.query,
-    return_value=(True, None)
-)
-FALSY_TRANSP_QUERY = create_autospec(
-    TestTransport.query,
-    return_value=(False, None)
-)
-PREPARE_MESSAGE = create_autospec(
-    TestTransport.prepare_message,
-    return_value=TransportRouteData(email.message_from_string(MESSAGE), {})
-)
 
-
-@patch.multiple(TestTransport, query=FALSY_TRANSP_QUERY,
-                prepare_message=DEFAULT, deliver=DEFAULT)
+@patch.object(TestTransport, 'query', return_value=NO)
+@patch.multiple(TestTransport, prepare_message=DEFAULT, deliver=DEFAULT)
 class TestSendingMessagesFalsyTransport(RouterCase):
     def test_calls_transport_query(self, query, prepare_message, deliver):
         message = email.message_from_string(MESSAGE)
@@ -100,8 +83,12 @@ class TestSendingMessagesFalsyTransport(RouterCase):
         self.assertFalse(deliver.called)
 
 
-@patch.multiple(TestTransport, query=TRUISH_TRANSP_QUERY,
-                prepare_message=PREPARE_MESSAGE, deliver=DEFAULT)
+PREPARED_MESSAGE = TransportRouteData(email.message_from_string(MESSAGE), {})
+
+
+@patch.object(TestTransport, 'deliver')
+@patch.object(TestTransport, 'prepare_message', return_value=PREPARED_MESSAGE)
+@patch.object(TestTransport, 'query', return_value=YES)
 class TestSendingMessagesTruishTransport(RouterCase):
     def test_calls_transport_prep_and_deliver(self, query, prepare_message,
                                               deliver):
