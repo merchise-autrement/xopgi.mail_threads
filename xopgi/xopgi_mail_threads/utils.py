@@ -108,7 +108,7 @@ class RegisteredType(type):
 
 
 try:
-    from xoeuf.models import is_object_installed
+    from xoeuf.modules import is_object_installed
 except ImportError:
     def is_object_installed(self, object):
         from xoeuf.modules import get_object_module
