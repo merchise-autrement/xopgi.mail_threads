@@ -37,18 +37,6 @@ logger = logging.getLogger(__name__)
 del logging
 
 
-def get_kwargs(func):
-    from xoutil.inspect import getfullargspec
-    spec = getfullargspec(func)
-    argsspec = spec.args
-    if argsspec and spec.defaults:
-        argsspec = argsspec[-len(spec.defaults):]
-    else:
-        argsspec = []
-    argsspec.extend(spec.kwonlyargs or [])
-    return argsspec
-
-
 class MailServer(Model):
     _inherit = 'ir.mail_server'
 
