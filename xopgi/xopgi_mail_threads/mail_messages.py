@@ -82,9 +82,9 @@ SAME_AS_ORIGINAL = None
 PREPEND_X = object()
 
 HEADERS_TO_COPY = {
-    str('Content-Disposition'): SAME_AS_ORIGINAL,
-    str('Content-Type'): SAME_AS_ORIGINAL,
-    str('Content-Id'): SAME_AS_ORIGINAL,
+    b'Content-Disposition': SAME_AS_ORIGINAL,
+    b'Content-Type': SAME_AS_ORIGINAL,
+    b'Content-Id': SAME_AS_ORIGINAL,
 }
 
 
@@ -175,11 +175,11 @@ def _chopped(msg, charset):
         if target is SAME_AS_ORIGINAL:
             target = safe_encode(header)
         elif target is PREPEND_X:
-            target = str('X-{}').format(safe_encode(header))
+            target = b'X-{}'.format(safe_encode(header))
         original = msg.get(header, Unset)
         if original is not Unset and target:
             result[target] = original
-    result.set_payload('[Removed part]', charset)
+    result.set_payload(b'[Removed part]', charset)
     if 'MIME-Version' not in msg:
         del result['MIME-Version']
     return result
