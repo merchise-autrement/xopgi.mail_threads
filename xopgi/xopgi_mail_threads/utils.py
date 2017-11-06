@@ -13,11 +13,8 @@ from __future__ import (division as _py3_division,
 
 
 from email.utils import getaddresses, formataddr
-
-try:
-    from odoo.release import version_info as ODOO_VERSION_INFO
-except ImportError:
-    from openerp.release import version_info as ODOO_VERSION_INFO
+from xoeuf.odoo.addons.base.ir.ir_mail_server import encode_header  # noqa
+from xoeuf.odoo.addons.base.ir.ir_mail_server import encode_rfc2822_address_header  # noqa
 
 try:
     # Odoo 10
@@ -31,26 +28,12 @@ except ImportError:
         from openerp.addons.mail.models.mail_thread import decode_header
 
 try:
-    from odoo.addons.base.ir.ir_mail_server import encode_header
-except ImportError:
-    from openerp.addons.base.ir.ir_mail_server import encode_header
-
-try:
     from odoo.tools.mail import decode_smtp_header
 except ImportError:
     try:
-        from openerp.addons.mail.mail_message \
-            import decode as decode_smtp_header
+        from openerp.addons.mail.mail_message import decode as decode_smtp_header  # noqa
     except ImportError:
-        from openerp.addons.mail.models.mail_message \
-            import decode as decode_smtp_header
-
-try:
-    from odoo.addons.base.ir.ir_mail_server \
-        import encode_rfc2822_address_header
-except ImportError:
-    from openerp.addons.base.ir.ir_mail_server \
-        import encode_rfc2822_address_header
+        from openerp.addons.mail.models.mail_message import decode as decode_smtp_header  # noqa
 
 
 class RegisteredType(type):
