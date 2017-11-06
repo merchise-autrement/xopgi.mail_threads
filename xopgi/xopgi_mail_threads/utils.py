@@ -78,25 +78,12 @@ class RegisteredType(type):
         Return a iterable (not necessarily a list).
 
         '''
+        from xoeuf.modules import is_object_installed
         return (
             obj
             for obj in self.registry
             if is_object_installed(model, obj)
         )
-
-
-try:
-    from xoeuf.modules import is_object_installed
-except ImportError:
-    def is_object_installed(self, object):
-        from xoeuf.modules import get_object_module
-        module = get_object_module(object)
-        if module:
-            mm = self.env['ir.module.module']
-            query = [('state', '=', 'installed'), ('name', '=', module)]
-            return bool(mm.search(query))
-        else:
-            return False
 
 
 # TODO: Move these to xoutil.  For that I need first to port the
