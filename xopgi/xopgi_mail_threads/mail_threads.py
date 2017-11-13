@@ -68,7 +68,7 @@ class MailThread(AbstractModel):
                     valid, data = result, None
                 if valid:
                     router.apply(self, routes, message, data=data)
-            except:
+            except Exception:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
         if not routes:
