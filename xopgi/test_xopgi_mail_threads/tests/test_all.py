@@ -13,9 +13,9 @@ from __future__ import (division as _py3_division,
 
 import email
 try:
-    from unittest.mock import patch, DEFAULT, create_autospec
+    from unittest.mock import patch, DEFAULT
 except ImportError:
-    from mock import patch, DEFAULT, create_autospec
+    from mock import patch, DEFAULT
 from xoeuf.odoo.tests.common import TransactionCase
 from xoeuf.odoo.addons.xopgi_mail_threads import TransportRouteData
 
@@ -69,7 +69,6 @@ class TestReceivingMailsTruishQuery(RouterCase):
         )
         self.assertTrue(query.called)
         self.assertTrue(apply.called)
-
 
 
 @patch.object(TestTransport, 'query', return_value=NO)

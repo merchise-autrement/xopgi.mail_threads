@@ -1,16 +1,11 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi.mail_threads.util
-# ---------------------------------------------------------------------
-# Copyright (c) 2015-2017 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# This is free software; you can redistribute it and/or modify it under the
-# terms of the LICENCE attached (see LICENCE file) in the distribution
-# package.
+# This is free software; you can do what the LICENCE file allows you to.
 #
-# Created on 2015-01-15
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
@@ -18,11 +13,6 @@ from __future__ import (division as _py3_division,
 
 
 from email.utils import getaddresses, formataddr
-
-try:
-    from odoo.release import version_info as ODOO_VERSION_INFO
-except ImportError:
-    from openerp.release import version_info as ODOO_VERSION_INFO
 
 try:
     # Odoo 10
@@ -38,17 +28,15 @@ except ImportError:
 try:
     from odoo.addons.base.ir.ir_mail_server import encode_header
 except ImportError:
-    from openerp.addons.base.ir.ir_mail_server import encode_header
+    from openerp.addons.base.ir.ir_mail_server import encode_header  # noqa
 
 try:
     from odoo.tools.mail import decode_smtp_header
 except ImportError:
     try:
-        from openerp.addons.mail.mail_message \
-            import decode as decode_smtp_header
+        from openerp.addons.mail.mail_message import decode as decode_smtp_header  # noqa
     except ImportError:
-        from openerp.addons.mail.models.mail_message \
-            import decode as decode_smtp_header
+        from openerp.addons.mail.models.mail_message import decode as decode_smtp_header  # noqa
 
 try:
     from odoo.addons.base.ir.ir_mail_server \

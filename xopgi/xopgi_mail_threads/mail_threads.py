@@ -1,15 +1,11 @@
-# -*- encoding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi.xopgi_mail_threads.threads
-# ---------------------------------------------------------------------
-# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# This is free software; you can redistribute it and/or modify it under the
-# terms of the LICENCE attached (see LICENCE file) in the distribution
-# package.
+# This is free software; you can do what the LICENCE file allows you to.
 #
-# Created on 2014-06-18
 
 '''Extends OpenERP mail detection strategies.
 
@@ -68,7 +64,7 @@ class MailThread(AbstractModel):
                     valid, data = result, None
                 if valid:
                     router.apply(self, routes, message, data=data)
-            except:
+            except Exception:
                 _logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
         if not routes:

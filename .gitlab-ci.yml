@@ -1,4 +1,9 @@
 ---
-# Standard gitlab ci configuration file.
-job1:
+stages:
+  - lint
+
+lint:
   script: merchise_lint
+  stage: lint
+  tags:
+    - mercurio
