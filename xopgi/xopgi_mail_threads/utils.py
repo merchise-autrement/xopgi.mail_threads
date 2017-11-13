@@ -20,11 +20,6 @@ from __future__ import (division as _py3_division,
 from email.utils import getaddresses, formataddr
 
 try:
-    from odoo.release import version_info as ODOO_VERSION_INFO
-except ImportError:
-    from openerp.release import version_info as ODOO_VERSION_INFO
-
-try:
     # Odoo 10
     from odoo.tools.mail import decode_message_header as decode_header
 except ImportError:
