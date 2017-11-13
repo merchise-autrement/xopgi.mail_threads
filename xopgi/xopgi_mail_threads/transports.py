@@ -79,7 +79,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         while not found and candidate:
             try:
                 res = candidate.query(obj, message)
-            except:
+            except Exception:
                 _logger.exception(
                     'Candidate transport %s failed. Proceeding with another',
                     candidate
