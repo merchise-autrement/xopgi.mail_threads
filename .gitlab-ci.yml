@@ -6,4 +6,4 @@ lint:
   script: merchise_lint
   stage: lint
   tags:
-    - mercurio
+    - merchise-lint
