@@ -6,7 +6,6 @@
 #
 # This is free software; you can do what the LICENCE file allows you to.
 #
-# flake8: noqa
 
 {
     "name": "Mail Threads (xopgi)",
@@ -20,11 +19,10 @@
     "data": [
         "views/transitional.xml"
     ],
-    "demo_xml": [],
     "application": False,
     "auto_install": True,
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (11, 0)
+    'installable': 8 <= MAJOR_ODOO_VERSION < 12,  # noqa
 }

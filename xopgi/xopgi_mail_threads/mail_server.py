@@ -24,24 +24,12 @@ from __future__ import (division as _py3_division,
 from xoutil.context import context as execution_context
 from xoutil import logger as _logger
 
-try:
-    from openerp.models import Model
-    from openerp import api
-except ImportError:
-    from odoo.models import Model
-    from odoo import api
+from xoeuf.models import Model
+from xoeuf import api
 
-
-def get_kwargs(func):
-    from xoutil.inspect import getfullargspec
-    spec = getfullargspec(func)
-    argsspec = spec.args
-    if argsspec and spec.defaults:
-        argsspec = argsspec[-len(spec.defaults):]
-    else:
-        argsspec = []
-    argsspec.extend(spec.kwonlyargs or [])
-    return argsspec
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 class MailServer(Model):
@@ -68,6 +56,7 @@ class MailServer(Model):
         '''
         _super = super(MailServer, self).send_email
         if DIRECT_SEND_CONTEXT not in execution_context:
+            logger.debug('Sending email with available transports.')
             transport = None
             try:
                 from .transports import MailTransportRouter as transports
@@ -78,6 +67,7 @@ class MailServer(Model):
                         self, message
                     )
                     if transport:
+                        logger.debug('Selected transport: %r.', transport)
                         with transport:
                             message, conndata = transport.prepare_message(
                                 self, message,
