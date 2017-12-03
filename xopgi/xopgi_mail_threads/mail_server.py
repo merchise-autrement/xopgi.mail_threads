@@ -19,7 +19,6 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-
 # TODO: Review with gevent-based model.
 from xoutil.context import context as execution_context
 from xoutil import logger as _logger
