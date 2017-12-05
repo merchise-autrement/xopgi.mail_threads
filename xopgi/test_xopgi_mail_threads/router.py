@@ -17,8 +17,8 @@ from xoeuf.odoo.addons.xopgi_mail_threads import MailRouter
 class TestRouter(MailRouter):
     @classmethod
     def query(cls, obj, message):
-        raise NotImplementedError  # You should mock me!
+        return False, None
 
     @classmethod
     def apply(cls, obj, routes, message, data=None):
-        raise NotImplementedError  # You should mock me!
+        pass
