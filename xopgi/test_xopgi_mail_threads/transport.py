@@ -17,7 +17,7 @@ from xoeuf.odoo.addons.xopgi_mail_threads import MailTransportRouter
 class TestTransport(MailTransportRouter):
     @classmethod
     def query(cls, obj, message):
-        raise NotImplementedError  # You should mock me!
+        return False, None
 
     def prepare_message(self, obj, message, data=None):
         return super(TestTransport, self).prepare_message(

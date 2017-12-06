@@ -35,15 +35,14 @@ try:
 except ImportError:
     from xoutil.objects import metaclass
 
-from xoutil import logger as _logger
 from xoutil.string import safe_encode
 
-try:
-    from openerp import api
-    from openerp.models import AbstractModel
-except ImportError:
-    from odoo import api
-    from odoo.models import AbstractModel
+from xoeuf import api
+from xoeuf.models import AbstractModel
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 class MailThread(AbstractModel):
@@ -52,6 +51,7 @@ class MailThread(AbstractModel):
     @api.model
     def _customize_routes(self, message, routes):
         from .routers import MailRouter
+        logger.debug('Processing incomming message with custom routers')
         for router in MailRouter.get_installed_objects(self):
             # Since a router may fail after modifying `routes` somehow, let's
             # keep it safe here to restore if needed.
@@ -63,12 +63,12 @@ class MailThread(AbstractModel):
                 else:
                     valid, data = result, None
                 if valid:
+                    logger.debug('Processing message using router %r', router)
                     router.apply(self, routes, message, data=data)
             except Exception:
-                _logger.exception('Router %s failed.  Ignoring it.', router)
+                logger.exception('Router %s failed.  Ignoring it.', router)
                 routes = routes_copy
         if not routes:
-            from xoutil import logger
             import email
             from email.message import Message
             if not isinstance(message, Message):
