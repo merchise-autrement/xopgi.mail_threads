@@ -30,12 +30,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-try:
-    from xoutil.eight.meta import metaclass
-except ImportError:
-    from xoutil.objects import metaclass
-
-from xoutil.string import safe_encode
+from xoutil.eight.meta import metaclass
+from xoutil.future.codecs import safe_encode
 
 from xoeuf import api
 from xoeuf.models import AbstractModel
