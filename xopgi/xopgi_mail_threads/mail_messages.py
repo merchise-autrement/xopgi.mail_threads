@@ -23,13 +23,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-try:
-    from xoutil.future.codecs import safe_encode, safe_decode
-except ImportError:
-    from xoutil.string import safe_encode, safe_decode
-
+from xoutil.future.codecs import safe_encode, safe_decode
 from xoeuf import fields, api, models
-
 from email.generator import DecodedGenerator
 
 

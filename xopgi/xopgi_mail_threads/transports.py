@@ -20,18 +20,17 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-try:
-    from xoutil.future.collections import namedtuple
-except ImportError:
-    from xoutil.collections import namedtuple
-try:
-    from xoutil.eight.meta import metaclass
-except ImportError:
-    from xoutil.objects import metaclass
+from xoutil.future.collections import namedtuple
+from xoutil.eight.meta import metaclass
 from xoutil.objects import classproperty
-from xoutil import logger as _logger
 
 from .utils import RegisteredType
+
+import logging
+_logger = logging.getLogger(__name__)
+del logging
+
+
 
 TransportRouteData = namedtuple('TransportRouteData',
                                 'message, connection_data')
