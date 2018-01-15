@@ -21,7 +21,6 @@ from __future__ import (division as _py3_division,
 
 # TODO: Review with gevent-based model.
 from xoutil.context import context as execution_context
-from xoutil import logger as _logger
 
 from xoeuf.models import Model
 from xoeuf import api
@@ -79,7 +78,7 @@ class MailServer(Model):
                 from openerp.addons.base.ir.ir_mail_server import \
                     MailDeliveryException
                 if not isinstance(e, MailDeliveryException):
-                    _logger.exception(
+                    logger.exception(
                         'Transport %s failed. Falling back',
                         transport,
                         extra=dict(message_from=message.get('From'),
