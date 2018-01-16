@@ -31,7 +31,6 @@ _logger = logging.getLogger(__name__)
 del logging
 
 
-
 TransportRouteData = namedtuple('TransportRouteData',
                                 'message, connection_data')
 
