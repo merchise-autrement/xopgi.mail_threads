@@ -1,9 +1,57 @@
 ---
 stages:
   - lint
+  - check
+  - build
+  - publish
 
 lint:
   script: merchise_lint
   stage: lint
   tags:
     - merchise-lint
+
+
+check signature of tag:
+  stage: check
+  script:
+    - git verify-commit $CI_COMMIT_SHA
+  tags:
+    - git
+    - gpg
+  only:
+    - /^master$/
+
+
+build rolling tarball:
+  stage: build
+  tags:
+    - python
+  script:
+    - sed -i "s/CI_COMMIT_SHA/+$CI_COMMIT_SHA/" setup.cfg
+    - sed -i "s/^# tag-build/tag-build/" setup.cfg
+    - python setup.py sdist
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 4 days
+  only:
+    - /^master$/
+
+
+publish tarball:
+  variables:
+    GIT_STRATEGY: none
+  stage: publish
+  tags:
+    - repo.lahavane.com
+  dependencies:
+    - build rolling tarball
+  script:
+    - ssh manu@gestion.lahavane.com "mkdir -p Repos/$CI_PROJECT_NAME"
+    - scp dist/*.tar.gz manu@gestion.lahavane.com:Repos/$CI_PROJECT_NAME
+  only:
+    - /^master$/
+  environment:
+    name: repo.lahavane.com
+    url: http://repo.lahavane.com/pypi/$CI_PROJECT_NAME
