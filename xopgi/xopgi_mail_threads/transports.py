@@ -152,8 +152,19 @@ class MailTransportRouter(metaclass(RegisteredType)):
         not defined.
 
         '''
+        from odoo.addons.base.ir.ir_mail_server import IrMailServer
+
         kwargs.update(dict(data or {}))
-        return server.send_email(message, **kwargs)
+        try:
+            return server.send_email(message, **kwargs)
+        except AssertionError as error:
+            if error.message == IrMailServer.NO_VALID_RECIPIENT:
+                _logger.info(
+                    "No valid recipients for message %s: %s",
+                    message.get('Message-Id'), message.get('To')
+                )
+            else:
+                raise
 
     def prepare_message(self, obj, message, data=None):
         '''Prepares the message to be delivered.
