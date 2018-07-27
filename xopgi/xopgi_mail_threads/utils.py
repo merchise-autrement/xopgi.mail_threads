@@ -137,3 +137,24 @@ def set_message_from(message, addresses, address_only=False):
     '''
     set_message_address_header(message, 'From', addresses,
                                address_only=address_only)
+
+
+def get_addresses_headers(message, headers):
+    '''Get all the addresses in messages according to given headers.
+
+    :param headers: The name of headers to get.  It's expected such headers,
+                    contain just email addresses.
+
+    :returns: a list of 2-tuples with name, email address.
+
+    '''
+    result = []
+    get = message.get_all
+    for header in headers:
+        result.extend(getaddresses(get(header, [])))
+    return result
+
+
+def get_recipients(message):
+    'Return a list pairs with the names and emails of the recipients.'
+    return get_addresses_headers(message, ['To', 'Cc', 'Bcc'])
