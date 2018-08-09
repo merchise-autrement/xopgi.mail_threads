@@ -70,7 +70,8 @@ class MailThread(AbstractModel):
             if not isinstance(message, Message):
                 message = email.message_from_string(safe_encode(message))
             logger.warn(
-                "No routes found for message.",
+                "No routes found for message coming from %r.",
+                message.get('Sender', message.get('From', '<>')),
                 extra=dict(
                     message_id=message.get('Message-Id', '<>'),
                     sender=message.get('Sender', message.get('From', '<>')),
@@ -80,6 +81,11 @@ class MailThread(AbstractModel):
                         message.get('Cc'),
                     ]
                 )
+            )
+        else:
+            logger.debug(
+                "Message accepted, coming from %r",
+                message.get('Sender', message.get('From', '<>')),
             )
         return routes
 
