@@ -37,7 +37,12 @@ class _Base(object):
 
     @api.multi
     def message_post(self, **kwargs):
-        return False
+        # WARNING: Odoo calls this method always (even after calling
+        # message_new) and it this method is expected to return a
+        # 'mail.message' object.  Odoo 10 and 11 call .write() on the result
+        # of this method, but they don't test is actually a message.  Our
+        # version of `write` is quite forgiving.
+        return self
 
     @api.multi
     def write(self, vals):
@@ -72,7 +77,6 @@ class SendBounce(_Base, models.TransientModel):
             bounce_body_html,
             custom_values['original_message'],
         )
-        # We need to return a model, because Odoo may call .write on it.
         return self.create({}).id
 
 
@@ -84,5 +88,4 @@ class Ignore(_Base, models.TransientModel):
         '''Ignore the message.
 
         '''
-        # We need to return a model, because Odoo may call .write on it.
         return self.create({}).id
