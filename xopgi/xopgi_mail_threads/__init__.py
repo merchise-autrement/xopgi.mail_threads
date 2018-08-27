@@ -14,7 +14,7 @@ from __future__ import (division as _py3_division,
 from . import mail_messages  # noqa
 from . import mail_threads  # noqa
 from . import mail_server  # noqa
-from . import noroute_model  # noqa
+from . import stdroutes  # noqa
 
 
 from .routers import MailRouter  # noqa
