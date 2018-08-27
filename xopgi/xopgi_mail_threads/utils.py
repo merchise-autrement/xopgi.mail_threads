@@ -11,10 +11,14 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+from xoeuf import SUPERUSER_ID
 
 from email.utils import getaddresses, formataddr
 from xoeuf.odoo.addons.base.ir.ir_mail_server import encode_header  # noqa
 from xoeuf.odoo.addons.base.ir.ir_mail_server import encode_rfc2822_address_header  # noqa
+
+from .stdroutes import BOUNCE_ROUTE_MODEL, IGNORE_MESSAGE_ROUTE_MODEL
+
 
 try:
     # Odoo 10
@@ -158,3 +162,39 @@ def get_addresses_headers(message, headers):
 def get_recipients(message):
     'Return a list pairs with the names and emails of the recipients.'
     return get_addresses_headers(message, ['To', 'Cc', 'Bcc'])
+
+
+def create_bounce_route(original_message, **custom_values):
+    '''Return the standard bounce route.
+
+    Routers that create this route will emit a bounce to the message's
+    Return-Path.
+
+    :param original_message: The email.Message that we're bouncing.
+
+    '''
+    return (
+        BOUNCE_ROUTE_MODEL,
+        False,
+        dict(custom_values, original_message=original_message),
+        SUPERUSER_ID,
+        None
+    )
+
+
+def create_ignore_route(original_message, **custom_values):
+    '''Return the standard ignore route.
+
+    Routers that create this route will simply accept and ignore the message.
+
+    :param original_message: The email.Message that we're accepting and
+                             ignoring.
+
+    '''
+    return (
+        IGNORE_MESSAGE_ROUTE_MODEL,
+        False,
+        dict(custom_values, original_message=original_message),
+        SUPERUSER_ID,
+        None
+    )
