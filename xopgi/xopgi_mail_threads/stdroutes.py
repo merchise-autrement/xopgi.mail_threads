@@ -71,11 +71,12 @@ class SendBounce(_Base, models.TransientModel):
         # _routing_create_bounce_email DO try to get the 'Return-Path' and
         # falls back to the argument, so we look for the Sender and fall-back
         # to From.
-        sender = get_first_of((msg_dict, ), 'Sender', 'From')
+        message = custom_values['original_message']
+        sender = get_first_of((message, ), 'Sender', 'From')
         MailThread._routing_create_bounce_email(
             sender,
             bounce_body_html,
-            custom_values['original_message'],
+            message,
         )
         return self.create({}).id
 
