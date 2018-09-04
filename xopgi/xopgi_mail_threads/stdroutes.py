@@ -16,7 +16,7 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoutil.objects import get_first_of
+from xoutil.future.itertools import first_non_null
 from xoeuf import api, models
 
 import logging
@@ -72,7 +72,9 @@ class SendBounce(_Base, models.TransientModel):
         # falls back to the argument, so we look for the Sender and fall-back
         # to From.
         message = custom_values['original_message']
-        sender = get_first_of((message, ), 'Sender', 'From')
+        sender = first_non_null(
+            message.get(header) for header in ('Sender', 'From')
+        )
         MailThread._routing_create_bounce_email(
             sender,
             bounce_body_html,
