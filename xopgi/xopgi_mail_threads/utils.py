@@ -159,9 +159,18 @@ def get_addresses_headers(message, headers):
     return result
 
 
-def get_recipients(message):
-    'Return a list pairs with the names and emails of the recipients.'
-    return get_addresses_headers(message, ['To', 'Cc', 'Bcc'])
+def get_recipients(message, also=None):
+    '''Return a list pairs with the names and emails of the recipients.
+
+    If `also` is non None, it must an iterable of header names that must
+    contain addresses.  Example of such a header is the custom 'Delivered-To'
+    set by some MTA.
+
+    '''
+    headers = ['To', 'Cc', 'Bcc']
+    if also:
+        headers.extend(also)
+    return get_addresses_headers(message, headers)
 
 
 def create_bounce_route(original_message, **custom_values):
