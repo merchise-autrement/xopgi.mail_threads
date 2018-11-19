@@ -60,13 +60,18 @@ class SendBounce(_Base, models.TransientModel):
         'original_message' of `custom_values`.
 
         '''
+        from xoutil.future.codecs import safe_encode
         custom_values = custom_values or {}
         bounce_body_html = custom_values.get('bounce_body_html')
         if not bounce_body_html:
-            bounce_body_html = """<div> <p>Hello,</p> <p>The following email sent
-            to %s was not delivered because no valid address was given.</p>
-            </div><blockquote>%s</blockquote>""" % (msg_dict.get('to'),
-                                                    msg_dict.get('body'))
+            bounce_body_html = ('<div> <p>Hello,</p><p>The following email '
+                                'sent to {to} was not delivered because '
+                                'no valid address was given.</p>'
+                                ' </div><blockquote>{body}</blockquote>')
+            bounce_body_html = bounce_body_html.format(
+                to=safe_encode(msg_dict.get('to')),
+                body=safe_encode(msg_dict.get('body'))
+            )
         MailThread = self.env['mail.thread']
         # _routing_create_bounce_email DO try to get the 'Return-Path' and
         # falls back to the argument, so we look for the Sender and fall-back
