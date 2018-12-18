@@ -80,7 +80,15 @@ class MailTransportRouter(metaclass(RegisteredType)):
             except Exception:
                 _logger.exception(
                     'Candidate transport %s failed. Proceeding with another',
-                    candidate
+                    candidate,
+                    extra=dict(
+                        message_to=message['To'],
+                        message_from=message['From'],
+                        message_delivered_to=message['Delivered-To'],
+                        message_subject=message['Subject'],
+                        message_return_path=message['Return-Path'],
+                        message_as_string=message.as_string()
+                    )
                 )
                 res = False
             if isinstance(res, tuple):
