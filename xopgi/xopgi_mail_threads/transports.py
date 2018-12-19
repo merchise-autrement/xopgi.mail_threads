@@ -218,7 +218,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         if references:
             refs = Messages.search([('message_id', 'in', references)])
         else:
-            refs = []
+            refs = Messages  # the empty recordset
         return msg, refs
 
 
