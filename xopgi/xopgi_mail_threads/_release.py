@@ -15,7 +15,7 @@ from __future__ import (division as _py3_division,
 def read_terpfile():
     import os
     from os.path import join
-    with open(join(os.path.dirname(__file__), '__openerp__.py'), 'rU') as fh:
+    with open(join(os.path.dirname(__file__), '__manifest__.py'), 'rU') as fh:
         content = fh.read()
         # This ODOO version is just to avoid SyntaxErrors.
         return eval(content, dict(MAJOR_ODOO_VERSION=8), {})
