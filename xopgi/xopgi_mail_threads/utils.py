@@ -20,24 +20,8 @@ from xoeuf.odoo.addons.base.ir.ir_mail_server import encode_rfc2822_address_head
 from .stdroutes import BOUNCE_ROUTE_MODEL, IGNORE_MESSAGE_ROUTE_MODEL
 
 
-try:
-    # Odoo 10
-    from odoo.tools.mail import decode_message_header as decode_header
-except ImportError:
-    try:
-        # Odoo 8
-        from openerp.addons.mail.mail_thread import decode_header
-    except ImportError:
-        # Odoo 9 fallback
-        from openerp.addons.mail.models.mail_thread import decode_header
-
-try:
-    from odoo.tools.mail import decode_smtp_header
-except ImportError:
-    try:
-        from openerp.addons.mail.mail_message import decode as decode_smtp_header  # noqa
-    except ImportError:
-        from openerp.addons.mail.models.mail_message import decode as decode_smtp_header  # noqa
+from odoo.tools.mail import decode_message_header as decode_header
+from odoo.tools.mail import decode_smtp_header
 
 
 class RegisteredType(type):
