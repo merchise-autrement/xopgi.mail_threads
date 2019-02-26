@@ -139,6 +139,12 @@ methods:
    ``send_mail`` and thus the pipeline is the default.
 
 
+Changes in 5.0
+==============
+
+Add support for Odoo 11 and Odoo 12.
+
+
 Changes in 4.0
 ==============
 
