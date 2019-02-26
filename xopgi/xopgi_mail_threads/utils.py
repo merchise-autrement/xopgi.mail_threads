@@ -21,7 +21,7 @@ from .stdroutes import BOUNCE_ROUTE_MODEL, IGNORE_MESSAGE_ROUTE_MODEL
 
 
 from odoo.tools.mail import decode_message_header as decode_header
-from odoo.tools.mail import decode_smtp_header
+from odoo.tools.mail import decode_smtp_header  # noqa
 
 
 class RegisteredType(type):
