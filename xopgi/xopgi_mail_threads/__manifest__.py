@@ -9,7 +9,7 @@
 
 {
     "name": "Mail Threads (xopgi)",
-    "version": "4.1",
+    "version": "5.0",
     "post_load": "post_load_hook",
     "author": "Merchise Autrement",
     "website": "http://xopgi.merchise.org/addons/xopgi_mail_threads",
@@ -24,5 +24,5 @@
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': 8 <= MAJOR_ODOO_VERSION < 12,  # noqa
+    'installable': 10 <= MAJOR_ODOO_VERSION < 13,  # noqa
 }

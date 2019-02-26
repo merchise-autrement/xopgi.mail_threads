@@ -39,3 +39,21 @@ run all Odoo 10 tests:
     ODOO_WORKTREE: odoo10
   only:
     - branches
+
+
+run all Odoo 11 tests:
+  <<: *run_tests
+  variables:
+    PYTHON: python3
+    ODOO_WORKTREE: odoo11
+  only:
+    - branches
+
+
+run all Odoo 12 tests:
+  <<: *run_tests
+  variables:
+    PYTHON: python3
+    ODOO_WORKTREE: odoo12
+  only:
+    - branches

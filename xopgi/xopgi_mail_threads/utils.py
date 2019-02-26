@@ -14,11 +14,20 @@ from __future__ import (division as _py3_division,
 from xoeuf import SUPERUSER_ID
 
 from email.utils import getaddresses, formataddr
-from xoeuf.odoo.addons.base.ir.ir_mail_server import encode_header  # noqa
-from xoeuf.odoo.addons.base.ir.ir_mail_server import encode_rfc2822_address_header  # noqa
+
+try:
+    from odoo.addons.base.ir.ir_mail_server import (
+        encode_header,
+        encode_rfc2822_address_header,
+    )
+except ImportError:
+    # Odoo 12
+    from odoo.addons.base.models.ir_mail_server import (  # noqa
+        encode_header,
+        encode_rfc2822_address_header,
+    )
 
 from .stdroutes import BOUNCE_ROUTE_MODEL, IGNORE_MESSAGE_ROUTE_MODEL
-
 
 from odoo.tools.mail import decode_message_header as decode_header
 from odoo.tools.mail import decode_smtp_header  # noqa
