@@ -1,9 +1,41 @@
 ---
 stages:
   - lint
+  - test
 
 lint:
   script: merchise_lint2
   stage: lint
   tags:
     - merchise-lint
+
+.run_tests: &run_tests
+  stage: test
+  tags:
+    - virtualenv
+    - xoeuf-tester
+  script:
+    - export CWD=`pwd`
+    - cd ~/src/$ODOO_WORKTREE
+    - git pull
+    - mkdir -p ~/virtualenvs
+    - rm -rf ~/virtualenvs/$CI_PROJECT_NAME-$ODOO_WORKTREE || true
+    - virtualenv -p `which $PYTHON` ~/virtualenvs/$CI_PROJECT_NAME-$ODOO_WORKTREE
+    - source ~/virtualenvs/$CI_PROJECT_NAME-$ODOO_WORKTREE/bin/activate
+    - pip install -r requirements.txt
+    - pip install -U "six>=1.9.0" "decorator>=4.0,<4.2" "hypothesis>=3.24"
+    - pip install -e .
+    - cd $CWD
+    - pip install -e .
+    - export ADDONS=`ls xopgi/ | egrep '^(xopgi_|tests_)' | xargs | tr " " ","`
+    - cd ~/src/$ODOO_WORKTREE
+    - runtests-odoo.sh -i $ADDONS
+
+
+run all Odoo 10 tests:
+  <<: *run_tests
+  variables:
+    PYTHON: python
+    ODOO_WORKTREE: odoo10
+  only:
+    - branches
