@@ -137,7 +137,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         .. versionchanged:: 4.0 No more old API signature.
 
         '''
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def deliver(self, server, message, data, **kwargs):
         '''Deliver if possible the message.
