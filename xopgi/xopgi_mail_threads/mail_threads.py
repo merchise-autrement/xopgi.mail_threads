@@ -25,7 +25,6 @@ Our current solution is two folded:
   as they see fit.
 
 '''
-
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
@@ -99,7 +98,7 @@ class MailThread(AbstractModel):
             result = _super(message, message_dict, model=model,
                             thread_id=thread_id,
                             custom_values=custom_values)
-        except (AssertionError, ValueError) as error:
+        except (AssertionError, ValueError):
             # super's message_route method may raise a ValueError if it finds
             # no route, we want to wait to see if we can find a custom route
             # before raising the ValueError.
