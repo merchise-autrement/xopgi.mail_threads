@@ -92,25 +92,25 @@ class MailThread(AbstractModel):
     def message_route(self, message, message_dict, model=None, thread_id=None,
                       custom_values=None):
         result = []
-        error = None
+        error_before_custom_routes = None
         try:
             _super = super(MailThread, self).message_route
             result = _super(message, message_dict, model=model,
                             thread_id=thread_id,
                             custom_values=custom_values)
-        except (AssertionError, ValueError):
+        except (AssertionError, ValueError) as error:
             # super's message_route method may raise a ValueError if it finds
             # no route, we want to wait to see if we can find a custom route
             # before raising the ValueError.
             #
             # In Odoo 9 super's message_route may raise an AssertionError if
             # the fallback model (i.e crm.lead) is not installed.
-            pass
+            error_before_custom_routes = error
         result = self._customize_routes(message, result or [])
         if result:
             return result
-        elif error:
-            raise error
+        elif error_before_custom_routes:
+            raise error_before_custom_routes
         else:
             return []
 
