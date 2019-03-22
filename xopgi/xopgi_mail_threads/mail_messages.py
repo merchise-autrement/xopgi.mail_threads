@@ -23,9 +23,14 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+from xoutil.eight.string import force as force_str
 from xoutil.future.codecs import safe_encode, safe_decode
+
 from xoeuf import fields, api, models
+
+from email import message_from_string
 from email.generator import DecodedGenerator
+from email.message import Message
 
 
 #: The name of the field to store the raw email.
@@ -49,8 +54,9 @@ class MailThread(models.AbstractModel):
 
     @api.model
     def message_parse(self, message, save_original=False):
-        from email.message import Message
-        assert isinstance(message, Message)
+        if not isinstance(message, Message):
+            message = force_str(message)
+            message = message_from_string(message)
         result = super(MailThread, self).message_parse(
             message, save_original=save_original
         )
