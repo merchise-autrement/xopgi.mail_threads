@@ -162,7 +162,7 @@ class MailTransportRouter(metaclass(RegisteredType)):
         '''
         try:
             from odoo.addons.base.ir.ir_mail_server import IrMailServer
-        except ImportModule:
+        except ImportError:
             # Odoo 12
             from odoo.addons.base.models.ir_mail_server import IrMailServer
 
