@@ -160,7 +160,11 @@ class MailTransportRouter(metaclass(RegisteredType)):
         not defined.
 
         '''
-        from odoo.addons.base.ir.ir_mail_server import IrMailServer
+        try:
+            from odoo.addons.base.ir.ir_mail_server import IrMailServer
+        except ImportModule:
+            # Odoo 12
+            from odoo.addons.base.models.ir_mail_server import IrMailServer
 
         kwargs.update(dict(data or {}))
         try:
