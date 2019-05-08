@@ -12,10 +12,13 @@
     "version": "4.1",
     "author": "Merchise Autrement",
     "depends": ['mail', 'xopgi_mail_threads'],
+    "data": ['data/alias.xml'],
     "application": False,
     "auto_install": False,
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': True
+    'installable': True,
+
+    'post_init_hook': '_assert_test_mode',
 }
