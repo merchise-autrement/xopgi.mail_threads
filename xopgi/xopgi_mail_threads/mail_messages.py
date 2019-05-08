@@ -6,7 +6,6 @@
 #
 # This is free software; you can do what the LICENCE file allows you to.
 #
-
 '''Appends raw email to 'mail.message' module.
 
 .. note:: On using `store_original`.
@@ -22,6 +21,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+import logging
+
 from xoutil.eight.string import force as force_str
 from xoutil.future.codecs import safe_encode, safe_decode
 
@@ -34,6 +35,9 @@ from email.message import Message
 
 #: The name of the field to store the raw email.
 RAW_EMAIL_ATTR = 'raw_email'
+
+
+logger = logging.getLogger(__name__)
 
 
 class MailMessage(models.Model):
@@ -59,14 +63,22 @@ class MailThread(models.AbstractModel):
         result = super(MailThread, self).message_parse(
             message, save_original=save_original
         )
-        from io import BytesIO
-        buf = BytesIO()
-        # Re-encode to the connection encoding
-        gen = ReencodingGenerator(buf, mangle_from_=False,
-                                  target_charset=self._cr._cnx.encoding)
-        gen.flatten(message)
-        message = safe_decode(buf.getvalue(), encoding=self._cr._cnx.encoding)
-        result[RAW_EMAIL_ATTR] = message
+        try:
+            from io import BytesIO
+            buf = BytesIO()
+            # Re-encode to the connection encoding
+            gen = ReencodingGenerator(buf, mangle_from_=False,
+                                      target_charset=self._cr._cnx.encoding)
+            gen.flatten(message)
+            message = safe_decode(buf.getvalue(),
+                                  encoding=self._cr._cnx.encoding)
+            result[RAW_EMAIL_ATTR] = message
+        except Exception:  # noqa
+            # Should any error happen while reencoding; it's not worthy to
+            # stop the message from being created.  Just log.
+            logger.exception(
+                'Error while re-encoding raw email.  Continuing normally'
+            )
         return result
 
 
