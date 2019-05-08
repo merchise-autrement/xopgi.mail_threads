@@ -21,12 +21,10 @@ LMTP instead of SMTP, or some other sort of bridge.
 Odoo versions supported
 =======================
 
-This package has been thoroughly used in Odoo 8.  At this point, we're
-starting to use it in Odoo 10.  It should work in Odoo 9, but we haven't
-tested it.
+We support only Odoo 10, 11 and 12 which those patched__ by
+Merchise Autrement [~°/~].
 
-.. warning:: Odoo versions supported are those patched__ by
-   Merchise Autrement [~°/~].
+.. note:: We plan to remove the need of the patch.
 
 __ https://github.com/merchise-autrement/odoo
 
