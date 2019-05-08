@@ -18,7 +18,6 @@
    be business-driven.
 
 '''
-
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
@@ -40,9 +39,9 @@ RAW_EMAIL_ATTR = 'raw_email'
 class MailMessage(models.Model):
     _inherit = 'mail.message'
 
-    raw_email = fields.Text('Raw Email',
-                            default='',
-                            help='The raw email message unprocessed.')
+    raw_email = fields.Binary('Raw Email',
+                              default=b'',
+                              help='The raw email message unprocessed.')
 
 
 # Since the mailgate program actually call mail_thread's `message_process`,
