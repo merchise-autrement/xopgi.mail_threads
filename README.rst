@@ -137,6 +137,14 @@ methods:
    ``send_mail`` and thus the pipeline is the default.
 
 
+Changes 6.0
+===========
+
+- Change raw_email field to be Binary, so that emails which contain NUL
+  characters don't fail.  Also avoid stopping messages from being processed if
+  the re-encoding fails.
+
+
 Changes in 5.0
 ==============
 
